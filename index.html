@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Minolovac - Ispravljena verzija</title>
+    <title>Minolovac - Lagano / Srednje / Teško</title>
     <style>
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
+
         body {
             background: linear-gradient(135deg, #2d5a3b, #1e3a2f);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -20,18 +21,22 @@
             margin: 0;
             padding: 20px;
         }
+
         .game-container {
             background: #3b3f45;
             border-radius: 28px;
-            padding: 20px 15px;
+            padding: 20px 15px 20px 15px;
             box-shadow: 0 20px 35px rgba(0,0,0,0.4);
             text-align: center;
         }
+
         h1 {
-            margin: 0 0 5px;
+            margin: 0 0 5px 0;
             color: #ffd966;
             font-size: 1.8rem;
+            text-shadow: 2px 2px 0 #7a4c1a;
         }
+
         .difficulty-panel {
             display: flex;
             justify-content: center;
@@ -39,6 +44,7 @@
             margin-bottom: 15px;
             flex-wrap: wrap;
         }
+
         .difficulty-btn {
             background: #2c2f36;
             border: none;
@@ -47,16 +53,19 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
-            font-size: 0.85rem;
             transition: 0.1s;
+            font-size: 0.85rem;
         }
+
         .difficulty-btn.active {
             background: #ff914d;
             box-shadow: 0 0 0 2px #ffd966;
         }
+
         .difficulty-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.96);
         }
+
         .info-panel {
             background: #2c2f36;
             border-radius: 60px;
@@ -70,52 +79,84 @@
             color: white;
             font-weight: bold;
         }
+
         .mine-counter, .restart-btn, .flag-counter {
             background: #1e1f24;
             padding: 5px 14px;
             border-radius: 40px;
             font-size: 1.1rem;
             font-family: monospace;
+            letter-spacing: 2px;
         }
+
         .restart-btn {
             background: #ff914d;
             cursor: pointer;
+            transition: 0.1s linear;
             border: none;
             color: white;
+            font-weight: bold;
             font-size: 0.95rem;
         }
+
+        .restart-btn:active {
+            transform: scale(0.96);
+        }
+
         .board {
             display: grid;
-            background: #5a5e6e;
+            background-color: #7c7f8c;
             padding: 6px;
             border-radius: 12px;
             gap: 2px;
+            background: #5a5e6e;
             justify-content: center;
             margin: 0 auto;
             width: fit-content;
         }
+
         .cell {
             aspect-ratio: 1 / 1;
-            min-width: 40px;
-            background: #b0b3c0;
+            min-width: 32px;
+            background-color: #b0b3c0;
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.15rem;
+            font-size: 1rem;
             cursor: pointer;
+            transition: 0.05s linear;
             box-shadow: inset 0 -1px 0 #7e8292, inset 1px 1px 0 #eef3ff;
+            touch-action: manipulation;
         }
-        @media (max-width: 650px) { .cell { min-width: 34px; font-size: 0.95rem; } }
-        @media (max-width: 550px) { .cell { min-width: 30px; font-size: 0.9rem; } }
-        @media (max-width: 480px) { .cell { min-width: 28px; font-size: 0.85rem; } }
+
+        @media (max-width: 650px) {
+            .cell { min-width: 28px; font-size: 0.85rem; }
+        }
+        @media (max-width: 550px) {
+            .cell { min-width: 26px; font-size: 0.8rem; }
+            .difficulty-btn { padding: 4px 10px; font-size: 0.75rem; }
+        }
+        @media (max-width: 450px) {
+            .cell { min-width: 24px; font-size: 0.7rem; }
+        }
+
         .cell.revealed {
-            background: #dbdee8;
+            background-color: #dbdee8;
             box-shadow: inset 0 0 0 1px #9da0ae;
+            cursor: default;
         }
-        .cell.flagged::before { content: "🚩"; font-size: 0.95rem; }
-        .cell.revealed.flagged::before { content: ""; }
+
+        .cell.flagged::before {
+            content: "🚩";
+            font-size: 0.9rem;
+        }
+
+        .cell.revealed.flagged::before {
+            content: "";
+        }
+
         .cell[data-value="1"] { color: #1e4d8f; }
         .cell[data-value="2"] { color: #2d6a2d; }
         .cell[data-value="3"] { color: #c92a2a; }
@@ -124,15 +165,33 @@
         .cell[data-value="6"] { color: #3f7e7e; }
         .cell[data-value="7"] { color: black; }
         .cell[data-value="8"] { color: #5e2a5e; }
-        .cell.bomb-revealed { background: #e03a3a; color: white; }
-        .cell.bomb-revealed::after { content: "💣"; font-size: 0.9rem; }
+
+        .cell.bomb-revealed {
+            background-color: #e03a3a;
+            color: white;
+        }
+        .cell.bomb-revealed::after {
+            content: "💣";
+            font-size: 0.8rem;
+        }
+
         .message-area {
             margin-top: 18px;
             background: #22252c;
             padding: 6px 12px;
             border-radius: 40px;
             color: #ffd966;
+            font-weight: bold;
             font-size: 0.85rem;
+        }
+        footer {
+            font-size: 0.7rem;
+            margin-top: 12px;
+            color: #bbb;
+        }
+        button {
+            background: none;
+            border: none;
         }
         .instruction {
             background: #1e1f24;
@@ -148,229 +207,357 @@
 <div>
     <div class="game-container">
         <h1>💣 MINOLOVAC</h1>
+        
         <div class="difficulty-panel">
             <button class="difficulty-btn" data-diff="easy">🟢 LAGANO (8x8)</button>
             <button class="difficulty-btn active" data-diff="medium">🟡 SREDNJE (10x10)</button>
-            <button class="difficulty-btn" data-diff="hard">🔴 TEŠKO (12x12)</button>
+            <button class="difficulty-btn" data-diff="hard">🔴 TEŠKO (14x14)</button>
         </div>
+
         <div class="info-panel">
             <div class="mine-counter">💣 000</div>
             <button class="restart-btn" id="restartGame">😊 NOVA IGRA</button>
             <div class="flag-counter">🚩 000</div>
         </div>
         <div class="board" id="board"></div>
-        <div class="message-area" id="statusMsg">⭐ KRATKI dodir = otkrij | DUGI dodir = zastavica</div>
-        <div class="instruction">📱 DUGI DODIR (pritisni i drži 0.5s) za 🚩</div>
+        <div class="message-area" id="statusMsg">🌟 Lijevi klik = otkrij | Desni klik / dugi dodir = 🚩</div>
+        <div class="instruction">📱 Na mobitelu: KRATKI dodir = otkrij | DUGI dodir (1 sekunda) = zastavica</div>
+        <footer>Razine težine | Prvi klik nikad nije mina</footer>
     </div>
 </div>
 
 <script>
-(function(){
-    const DIFFS = {
+    // ---------- POSTAVKE RAZINA ----------
+    let currentDifficulty = "medium";
+    let BOARD_SIZE = 10;
+    let TOTAL_MINES = 15;
+    
+    const DIFFICULTY_SETTINGS = {
         easy:   { size: 8,  mines: 10 },
         medium: { size: 10, mines: 15 },
-        hard:   { size: 12, mines: 28 }
+        hard:   { size: 14, mines: 35 }
     };
     
-    let currentDiff = "medium";
-    let size = 10, totalMines = 15;
-    let grid = [];
-    let active = true, first = true;
-    let boardDiv = document.getElementById("board");
-    let statusDiv = document.getElementById("statusMsg");
-    let mineSpan = document.querySelector(".mine-counter");
-    let flagSpan = document.querySelector(".flag-counter");
-    
-    function updateUI() {
+    let board = [];
+    let gameActive = true;
+    let firstMove = true;
+    let boardElement = document.getElementById("board");
+    let mineCounterSpan = document.querySelector(".mine-counter");
+    let flagCounterSpan = document.querySelector(".flag-counter");
+    let statusMsgDiv = document.getElementById("statusMsg");
+
+    function updateFlagCounter() {
+        let flagCount = 0;
+        for(let r = 0; r < BOARD_SIZE; r++) {
+            for(let c = 0; c < BOARD_SIZE; c++) {
+                if(board[r][c] && board[r][c].flag) flagCount++;
+            }
+        }
+        flagCounterSpan.innerText = "🚩 " + String(flagCount).padStart(3, '0');
+    }
+
+    function updateMineCounter() {
         let flagged = 0;
-        for(let i=0;i<size;i++) for(let j=0;j<size;j++) if(grid[i][j].flag) flagged++;
-        mineSpan.innerText = `💣 ${String(totalMines - flagged).padStart(3,'0')}`;
-        flagSpan.innerText = `🚩 ${String(flagged).padStart(3,'0')}`;
+        for(let r=0; r<BOARD_SIZE; r++)
+            for(let c=0; c<BOARD_SIZE; c++)
+                if(board[r][c] && board[r][c].flag) flagged++;
+        let remaining = TOTAL_MINES - flagged;
+        mineCounterSpan.innerText = `💣 ${String(remaining).padStart(3, '0')}`;
     }
-    
-    function initEmpty() {
-        let g = [];
-        for(let i=0;i<size;i++) {
-            g[i] = [];
-            for(let j=0;j<size;j++) g[i][j] = { mine:false, revealed:false, flag:false, val:0 };
-        }
-        return g;
-    }
-    
-    function placeMines(exR, exC) {
-        let placed = 0;
-        while(placed < totalMines) {
-            let r = Math.floor(Math.random()*size);
-            let c = Math.floor(Math.random()*size);
-            if((r===exR && c===exC)) continue;
-            if(!grid[r][c].mine) {
-                grid[r][c].mine = true;
-                placed++;
+
+    function initEmptyBoard() {
+        let newBoard = [];
+        for(let i = 0; i < BOARD_SIZE; i++) {
+            newBoard[i] = [];
+            for(let j = 0; j < BOARD_SIZE; j++) {
+                newBoard[i][j] = {
+                    mine: false,
+                    revealed: false,
+                    flag: false,
+                    neighborMines: 0
+                };
             }
         }
-        for(let r=0;r<size;r++) {
-            for(let c=0;c<size;c++) {
-                if(grid[r][c].mine) { grid[r][c].val = -1; continue; }
-                let cnt=0;
-                for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) if(dr||dc) {
-                    let nr=r+dr, nc=c+dc;
-                    if(nr>=0 && nr<size && nc>=0 && nc<size && grid[nr][nc].mine) cnt++;
+        return newBoard;
+    }
+
+    function placeMines(excludeRow, excludeCol) {
+        let minesPlaced = 0;
+        while(minesPlaced < TOTAL_MINES) {
+            let row = Math.floor(Math.random() * BOARD_SIZE);
+            let col = Math.floor(Math.random() * BOARD_SIZE);
+            if((row === excludeRow && col === excludeCol)) continue;
+            if(!board[row][col].mine) {
+                board[row][col].mine = true;
+                minesPlaced++;
+            }
+        }
+        for(let r = 0; r < BOARD_SIZE; r++) {
+            for(let c = 0; c < BOARD_SIZE; c++) {
+                if(board[r][c].mine) {
+                    board[r][c].neighborMines = -1;
+                    continue;
                 }
-                grid[r][c].val = cnt;
+                let cnt = 0;
+                for(let dr = -1; dr <= 1; dr++) {
+                    for(let dc = -1; dc <= 1; dc++) {
+                        if(dr === 0 && dc === 0) continue;
+                        let nr = r + dr, nc = c + dc;
+                        if(nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc].mine) cnt++;
+                    }
+                }
+                board[r][c].neighborMines = cnt;
             }
         }
     }
-    
-    function revealEmpty(r,c) {
-        if(r<0||r>=size||c<0||c>=size) return;
-        let cell = grid[r][c];
-        if(cell.revealed || cell.flag || cell.mine) return;
-        cell.revealed = true;
-        if(cell.val === 0) {
-            for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) if(dr||dc) revealEmpty(r+dr,c+dc);
-        }
-    }
-    
-    function checkWin() {
-        for(let i=0;i<size;i++) for(let j=0;j<size;j++) if(!grid[i][j].mine && !grid[i][j].revealed) return;
-        if(active) {
-            active = false;
-            statusDiv.innerHTML = "🎉 POBJEDA! Čestitamo! 🎉";
-            for(let i=0;i<size;i++) for(let j=0;j<size;j++) if(grid[i][j].mine) grid[i][j].flag = true;
-            render();
-        }
-    }
-    
-    function revealCell(r,c) {
-        if(!active) return;
-        let cell = grid[r][c];
+
+    function revealEmpty(row, col) {
+        if(row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return;
+        let cell = board[row][col];
         if(cell.revealed) return;
         if(cell.flag) return;
-        if(cell.mine) {
-            cell.revealed = true;
-            active = false;
-            statusDiv.innerHTML = "💥 BOOM! Izgubio/la si! Pritisni NOVA IGRA 💥";
-            for(let i=0;i<size;i++) for(let j=0;j<size;j++) if(grid[i][j].mine) grid[i][j].revealed = true;
-            render();
-            return;
-        }
-        if(cell.val === 0) revealEmpty(r,c);
-        else cell.revealed = true;
-        render();
-        checkWin();
-    }
-    
-    function toggleFlag(r,c) {
-        if(!active) return;
-        let cell = grid[r][c];
-        if(cell.revealed) return;
-        cell.flag = !cell.flag;
-        updateUI();
-        render();
-        checkWin();
-    }
-    
-    function firstClick(r,c) {
-        if(!first) return;
-        if(grid[r][c].flag) return;
-        grid = initEmpty();
-        placeMines(r,c);
-        first = false;
-        revealCell(r,c);
-    }
-    
-    function render() {
-        boardDiv.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-        let html = '';
-        for(let i=0;i<size;i++) {
-            for(let j=0;j<size;j++) {
-                const cell = grid[i][j];
-                let cls = 'cell';
-                let content = '';
-                let dataVal = '';
-                if(cell.revealed) {
-                    cls += ' revealed';
-                    if(cell.mine) {
-                        cls += ' bomb-revealed';
-                    } else if(cell.val > 0) {
-                        content = cell.val;
-                        dataVal = `data-value="${cell.val}"`;
-                    }
-                } else if(cell.flag) {
-                    cls += ' flagged';
+        if(cell.mine) return;
+        
+        cell.revealed = true;
+        if(cell.neighborMines === 0) {
+            for(let dr = -1; dr <= 1; dr++) {
+                for(let dc = -1; dc <= 1; dc++) {
+                    if(dr === 0 && dc === 0) continue;
+                    revealEmpty(row+dr, col+dc);
                 }
-                html += `<div class="${cls}" data-r="${i}" data-c="${j}" ${dataVal}>${content}</div>`;
             }
         }
-        boardDiv.innerHTML = html;
-        
-        // PONOVNO VEŽI EVENTE NAKON RENDERANJA
-        document.querySelectorAll('.cell').forEach(el => {
-            const r = parseInt(el.dataset.r);
-            const c = parseInt(el.dataset.c);
-            
-            // Miš
-            el.onclick = (e) => {
-                e.stopPropagation();
-                if(first) firstClick(r,c);
-                else revealCell(r,c);
-            };
-            el.oncontextmenu = (e) => {
-                e.preventDefault();
-                toggleFlag(r,c);
-            };
-            
-            // Touch (mobitel)
-            let timer = null;
-            el.ontouchstart = (e) => {
-                e.preventDefault();
-                timer = setTimeout(() => { 
-                    toggleFlag(r,c); 
-                    timer = null; 
-                }, 500);
-            };
-            el.ontouchend = (e) => {
-                e.preventDefault();
-                if(timer) {
-                    clearTimeout(timer);
-                    if(first) firstClick(r,c);
-                    else revealCell(r,c);
-                    timer = null;
+    }
+
+    function checkWin() {
+        let allSafeRevealed = true;
+        for(let i=0; i<BOARD_SIZE; i++) {
+            for(let j=0; j<BOARD_SIZE; j++) {
+                let cell = board[i][j];
+                if(!cell.mine && !cell.revealed) {
+                    allSafeRevealed = false;
                 }
-            };
-            el.ontouchmove = () => { 
-                if(timer) { 
-                    clearTimeout(timer); 
-                    timer = null; 
-                } 
-            };
+            }
+        }
+        if(allSafeRevealed && gameActive) {
+            gameActive = false;
+            statusMsgDiv.innerHTML = "🎉 POBJEDA! Savršeno! 🎉  Klikni NOVA IGRA";
+            statusMsgDiv.style.background = "#2b5e2b";
+            for(let i=0;i<BOARD_SIZE;i++)
+                for(let j=0;j<BOARD_SIZE;j++)
+                    if(board[i][j].mine && !board[i][j].flag)
+                        board[i][j].flag = true;
+            updateFlagCounter();
+            renderBoard();
+        }
+    }
+
+    function revealCell(row, col) {
+        if(!gameActive) return;
+        let cell = board[row][col];
+        if(cell.revealed) return;
+        if(cell.flag) {
+            statusMsgDiv.innerHTML = "⚠️ Ukloni zastavicu prije otkrivanja! (dugi dodir)";
+            return;
+        }
+        if(cell.mine) {
+            cell.revealed = true;
+            gameActive = false;
+            statusMsgDiv.innerHTML = `💥 BOOM! Naletio/la si na minu. Igra gotova. Pritisni NOVA IGRA 💥`;
+            statusMsgDiv.style.background = "#a12222";
+            for(let i=0;i<BOARD_SIZE;i++)
+                for(let j=0;j<BOARD_SIZE;j++)
+                    if(board[i][j].mine) board[i][j].revealed = true;
+            renderBoard();
+            return;
+        }
+        if(cell.neighborMines === 0) {
+            revealEmpty(row, col);
+        } else {
+            cell.revealed = true;
+        }
+        renderBoard();
+        checkWin();
+    }
+
+    function toggleFlag(row, col) {
+        if(!gameActive) return;
+        let cell = board[row][col];
+        if(cell.revealed) return;
+        cell.flag = !cell.flag;
+        updateFlagCounter();
+        updateMineCounter();
+        renderBoard();
+        checkWin();
+    }
+
+    function firstClickHandler(row, col) {
+        if(!firstMove) return false;
+        if(board[row][col].flag) return false;
+        board = initEmptyBoard();
+        placeMines(row, col);
+        firstMove = false;
+        revealCell(row, col);
+        renderBoard();
+        return true;
+    }
+
+    // NOVI POBOLJŠANI TOUCH EVENTI ZA MOBITEL
+    function attachEvents() {
+        const cells = document.querySelectorAll(".cell");
+        cells.forEach(cellDiv => {
+            const row = parseInt(cellDiv.getAttribute("data-row"));
+            const col = parseInt(cellDiv.getAttribute("data-col"));
+            
+            // Lijevi klik (miš)
+            cellDiv.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if(!gameActive) return;
+                if(firstMove) {
+                    firstClickHandler(row, col);
+                } else {
+                    revealCell(row, col);
+                }
+            });
+            
+            // Desni klik (miš)
+            cellDiv.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                if(!gameActive) return;
+                toggleFlag(row, col);
+            });
+            
+            // ----- MOBITEL: razlikovanje kratkog i dugog dodira -----
+            let touchStartTime = 0;
+            let touchTimeout = null;
+            let hasPerformedLongPress = false;
+            
+            cellDiv.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                touchStartTime = Date.now();
+                hasPerformedLongPress = false;
+                
+                // Postavi timeout za dugi dodir (500ms)
+                touchTimeout = setTimeout(() => {
+                    if(!hasPerformedLongPress && gameActive) {
+                        hasPerformedLongPress = true;
+                        // DUGI DODIR -> zastavica
+                        toggleFlag(row, col);
+                        // Vibriranje ako mobitel podržava (opcionalno)
+                        if(navigator.vibrate) navigator.vibrate(50);
+                    }
+                }, 500);
+            });
+            
+            cellDiv.addEventListener("touchend", (e) => {
+                e.preventDefault();
+                clearTimeout(touchTimeout);
+                
+                const touchDuration = Date.now() - touchStartTime;
+                
+                // Ako nije bio dugi dodir i trajalo je manje od 500ms -> KRATKI DODIR (otkrivanje)
+                if(!hasPerformedLongPress && touchDuration < 500 && gameActive) {
+                    if(firstMove) {
+                        firstClickHandler(row, col);
+                    } else {
+                        revealCell(row, col);
+                    }
+                }
+                touchStartTime = 0;
+                hasPerformedLongPress = false;
+            });
+            
+            cellDiv.addEventListener("touchcancel", (e) => {
+                clearTimeout(touchTimeout);
+                touchStartTime = 0;
+                hasPerformedLongPress = false;
+            });
+            
+            // Spriječi skrolanje dok dodiruješ polje
+            cellDiv.addEventListener("touchmove", (e) => {
+                clearTimeout(touchTimeout);
+                touchStartTime = 0;
+                hasPerformedLongPress = false;
+            });
+        });
+    }
+
+    function renderBoard() {
+        boardElement.innerHTML = "";
+        boardElement.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
+        for(let i = 0; i < BOARD_SIZE; i++) {
+            for(let j = 0; j < BOARD_SIZE; j++) {
+                const cell = board[i][j];
+                const cellDiv = document.createElement("div");
+                cellDiv.classList.add("cell");
+                cellDiv.setAttribute("data-row", i);
+                cellDiv.setAttribute("data-col", j);
+                
+                if(cell.revealed) {
+                    cellDiv.classList.add("revealed");
+                    if(cell.mine) {
+                        cellDiv.classList.add("bomb-revealed");
+                        cellDiv.innerText = "";
+                    } else {
+                        let val = cell.neighborMines;
+                        if(val > 0) {
+                            cellDiv.innerText = val;
+                            cellDiv.setAttribute("data-value", val);
+                        } else {
+                            cellDiv.innerText = "";
+                        }
+                    }
+                } else {
+                    if(cell.flag) {
+                        cellDiv.classList.add("flagged");
+                        cellDiv.innerText = "";
+                    } else {
+                        cellDiv.innerText = "";
+                    }
+                }
+                boardElement.appendChild(cellDiv);
+            }
+        }
+        attachEvents();
+    }
+
+    function newGameWithDifficulty(difficulty) {
+        currentDifficulty = difficulty;
+        const settings = DIFFICULTY_SETTINGS[difficulty];
+        BOARD_SIZE = settings.size;
+        TOTAL_MINES = settings.mines;
+        
+        gameActive = true;
+        firstMove = true;
+        board = initEmptyBoard();
+        
+        statusMsgDiv.innerHTML = "🌟 Lijevi klik = otkrij | Desni klik / dugi dodir = zastavica";
+        statusMsgDiv.style.background = "#22252c";
+        updateFlagCounter();
+        updateMineCounter();
+        renderBoard();
+    }
+    
+    function restartSameDifficulty() {
+        newGameWithDifficulty(currentDifficulty);
+    }
+
+    function setupDifficultyButtons() {
+        document.querySelectorAll(".difficulty-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".difficulty-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                const diff = btn.getAttribute("data-diff");
+                newGameWithDifficulty(diff);
+            });
+        });
+        document.getElementById("restartGame").addEventListener("click", () => {
+            restartSameDifficulty();
         });
     }
     
-    function newGame(diff) {
-        currentDiff = diff;
-        const s = DIFFS[diff];
-        size = s.size;
-        totalMines = s.mines;
-        active = true;
-        first = true;
-        grid = initEmpty();
-        updateUI();
-        render();
-        statusDiv.innerHTML = "⭐ KRATKI dodir = otkrij | DUGI dodir = zastavica";
-    }
-    
-    document.querySelectorAll('.difficulty-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            newGame(btn.dataset.diff);
-        };
-    });
-    document.getElementById('restartGame').onclick = () => newGame(currentDiff);
-    
-    newGame('medium');
-})();
+    setupDifficultyButtons();
+    newGameWithDifficulty("medium");
 </script>
 </body>
 </html>
