@@ -115,31 +115,49 @@
             width: fit-content;
         }
 
+        /* ========== KOCKICE POVEĆANE ZA 20% ========== */
         .cell {
             aspect-ratio: 1 / 1;
-            min-width: 32px;
+            min-width: 40px;        /* prije 32px → povećano 20% = 40px */
             background-color: #b0b3c0;
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.15rem;     /* prije 1rem → malo veći broj */
             cursor: pointer;
             transition: 0.05s linear;
             box-shadow: inset 0 -1px 0 #7e8292, inset 1px 1px 0 #eef3ff;
             touch-action: manipulation;
         }
 
+        /* Mobitel 650px */
         @media (max-width: 650px) {
-            .cell { min-width: 28px; font-size: 0.85rem; }
+            .cell { 
+                min-width: 34px;     /* prije 28px → 34px */
+                font-size: 0.95rem; 
+            }
         }
+        
+        /* Mobitel 550px */
         @media (max-width: 550px) {
-            .cell { min-width: 26px; font-size: 0.8rem; }
-            .difficulty-btn { padding: 4px 10px; font-size: 0.75rem; }
+            .cell { 
+                min-width: 32px;     /* prije 26px → 32px */
+                font-size: 0.9rem; 
+            }
+            .difficulty-btn { 
+                padding: 4px 10px; 
+                font-size: 0.75rem; 
+            }
         }
+        
+        /* Mali mobitel 450px */
         @media (max-width: 450px) {
-            .cell { min-width: 24px; font-size: 0.7rem; }
+            .cell { 
+                min-width: 29px;     /* prije 24px → 29px */
+                font-size: 0.85rem; 
+            }
         }
 
         .cell.revealed {
@@ -150,7 +168,7 @@
 
         .cell.flagged::before {
             content: "🚩";
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
         .cell.revealed.flagged::before {
@@ -172,7 +190,7 @@
         }
         .cell.bomb-revealed::after {
             content: "💣";
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
 
         .message-area {
@@ -402,7 +420,7 @@
         return true;
     }
 
-    // NOVI POBOLJŠANI TOUCH EVENTI ZA MOBITEL
+    // MOBITEL: touch eventi (kratki/dugi dodir)
     function attachEvents() {
         const cells = document.querySelectorAll(".cell");
         cells.forEach(cellDiv => {
@@ -427,7 +445,7 @@
                 toggleFlag(row, col);
             });
             
-            // ----- MOBITEL: razlikovanje kratkog i dugog dodira -----
+            // ----- MOBITEL -----
             let touchStartTime = 0;
             let touchTimeout = null;
             let hasPerformedLongPress = false;
@@ -437,13 +455,10 @@
                 touchStartTime = Date.now();
                 hasPerformedLongPress = false;
                 
-                // Postavi timeout za dugi dodir (500ms)
                 touchTimeout = setTimeout(() => {
                     if(!hasPerformedLongPress && gameActive) {
                         hasPerformedLongPress = true;
-                        // DUGI DODIR -> zastavica
                         toggleFlag(row, col);
-                        // Vibriranje ako mobitel podržava (opcionalno)
                         if(navigator.vibrate) navigator.vibrate(50);
                     }
                 }, 500);
@@ -455,7 +470,6 @@
                 
                 const touchDuration = Date.now() - touchStartTime;
                 
-                // Ako nije bio dugi dodir i trajalo je manje od 500ms -> KRATKI DODIR (otkrivanje)
                 if(!hasPerformedLongPress && touchDuration < 500 && gameActive) {
                     if(firstMove) {
                         firstClickHandler(row, col);
@@ -473,7 +487,6 @@
                 hasPerformedLongPress = false;
             });
             
-            // Spriječi skrolanje dok dodiruješ polje
             cellDiv.addEventListener("touchmove", (e) => {
                 clearTimeout(touchTimeout);
                 touchStartTime = 0;
