@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Minolovac - Brza verzija</title>
+    <title>Minolovac - Ispravljena verzija</title>
     <style>
         * {
             user-select: none;
@@ -48,10 +48,14 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 0.85rem;
+            transition: 0.1s;
         }
         .difficulty-btn.active {
             background: #ff914d;
             box-shadow: 0 0 0 2px #ffd966;
+        }
+        .difficulty-btn:active {
+            transform: scale(0.95);
         }
         .info-panel {
             background: #2c2f36;
@@ -172,10 +176,10 @@
     let size = 10, totalMines = 15;
     let grid = [];
     let active = true, first = true;
-    const boardDiv = document.getElementById("board");
-    const statusDiv = document.getElementById("statusMsg");
-    const mineSpan = document.querySelector(".mine-counter");
-    const flagSpan = document.querySelector(".flag-counter");
+    let boardDiv = document.getElementById("board");
+    let statusDiv = document.getElementById("statusMsg");
+    let mineSpan = document.querySelector(".mine-counter");
+    let flagSpan = document.querySelector(".flag-counter");
     
     function updateUI() {
         let flagged = 0;
@@ -299,13 +303,13 @@
             }
         }
         boardDiv.innerHTML = html;
-    }
-    
-    function bindEvents() {
-        boardDiv.querySelectorAll('.cell').forEach(el => {
+        
+        // PONOVNO VEŽI EVENTE NAKON RENDERANJA
+        document.querySelectorAll('.cell').forEach(el => {
             const r = parseInt(el.dataset.r);
             const c = parseInt(el.dataset.c);
             
+            // Miš
             el.onclick = (e) => {
                 e.stopPropagation();
                 if(first) firstClick(r,c);
@@ -315,10 +319,15 @@
                 e.preventDefault();
                 toggleFlag(r,c);
             };
+            
+            // Touch (mobitel)
             let timer = null;
             el.ontouchstart = (e) => {
                 e.preventDefault();
-                timer = setTimeout(() => { toggleFlag(r,c); timer = null; }, 500);
+                timer = setTimeout(() => { 
+                    toggleFlag(r,c); 
+                    timer = null; 
+                }, 500);
             };
             el.ontouchend = (e) => {
                 e.preventDefault();
@@ -329,7 +338,12 @@
                     timer = null;
                 }
             };
-            el.ontouchmove = () => { if(timer) { clearTimeout(timer); timer = null; } };
+            el.ontouchmove = () => { 
+                if(timer) { 
+                    clearTimeout(timer); 
+                    timer = null; 
+                } 
+            };
         });
     }
     
@@ -343,7 +357,6 @@
         grid = initEmpty();
         updateUI();
         render();
-        bindEvents();
         statusDiv.innerHTML = "⭐ KRATKI dodir = otkrij | DUGI dodir = zastavica";
     }
     
