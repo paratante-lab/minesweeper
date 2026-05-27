@@ -8,6 +8,7 @@
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         body {
@@ -39,20 +40,21 @@
         .difficulty-panel {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
         .difficulty-btn {
             background: #2c2f36;
             border: none;
-            padding: 6px 18px;
+            padding: 6px 15px;
             border-radius: 40px;
             color: white;
             font-weight: bold;
             cursor: pointer;
             transition: 0.1s;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .difficulty-btn.active {
@@ -72,7 +74,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
             color: white;
             font-weight: bold;
@@ -80,9 +82,9 @@
 
         .mine-counter, .restart-btn, .flag-counter {
             background: #1e1f24;
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 40px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-family: monospace;
             letter-spacing: 2px;
         }
@@ -94,12 +96,11 @@
             border: none;
             color: white;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .restart-btn:active {
             transform: scale(0.96);
-            background: #e07c3a;
         }
 
         .board {
@@ -116,7 +117,7 @@
 
         .cell {
             aspect-ratio: 1 / 1;
-            min-width: 28px;
+            min-width: 32px;
             background-color: #b0b3c0;
             border-radius: 6px;
             display: flex;
@@ -127,27 +128,18 @@
             cursor: pointer;
             transition: 0.05s linear;
             box-shadow: inset 0 -1px 0 #7e8292, inset 1px 1px 0 #eef3ff;
+            touch-action: manipulation;
         }
 
-        /* responsive prilagodba */
-        @media (max-width: 700px) {
-            .cell {
-                min-width: 26px;
-                font-size: 0.75rem;
-            }
+        @media (max-width: 650px) {
+            .cell { min-width: 28px; font-size: 0.85rem; }
         }
         @media (max-width: 550px) {
-            .cell {
-                min-width: 24px;
-                font-size: 0.7rem;
-            }
-            .difficulty-btn { padding: 4px 12px; font-size: 0.8rem; }
+            .cell { min-width: 26px; font-size: 0.8rem; }
+            .difficulty-btn { padding: 4px 10px; font-size: 0.75rem; }
         }
         @media (max-width: 450px) {
-            .cell {
-                min-width: 22px;
-                font-size: 0.65rem;
-            }
+            .cell { min-width: 24px; font-size: 0.7rem; }
         }
 
         .cell.revealed {
@@ -159,7 +151,6 @@
         .cell.flagged::before {
             content: "🚩";
             font-size: 0.9rem;
-            line-height: 1;
         }
 
         .cell.revealed.flagged::before {
@@ -202,6 +193,14 @@
             background: none;
             border: none;
         }
+        .instruction {
+            background: #1e1f24;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            margin-top: 5px;
+            font-size: 0.7rem;
+        }
     </style>
 </head>
 <body>
@@ -221,14 +220,15 @@
             <div class="flag-counter">🚩 000</div>
         </div>
         <div class="board" id="board"></div>
-        <div class="message-area" id="statusMsg">🌟 Lijevi klik = otkrij | Desni klik / dugi dodir = zastavica</div>
+        <div class="message-area" id="statusMsg">🌟 Lijevi klik = otkrij | Desni klik / dugi dodir = 🚩</div>
+        <div class="instruction">📱 Na mobitelu: KRATKI dodir = otkrij | DUGI dodir (1 sekunda) = zastavica</div>
         <footer>Razine težine | Prvi klik nikad nije mina</footer>
     </div>
 </div>
 
 <script>
     // ---------- POSTAVKE RAZINA ----------
-    let currentDifficulty = "medium";  // easy, medium, hard
+    let currentDifficulty = "medium";
     let BOARD_SIZE = 10;
     let TOTAL_MINES = 15;
     
@@ -357,7 +357,7 @@
         let cell = board[row][col];
         if(cell.revealed) return;
         if(cell.flag) {
-            statusMsgDiv.innerHTML = "⚠️ Ukloni zastavicu prije otkrivanja! (desni klik)";
+            statusMsgDiv.innerHTML = "⚠️ Ukloni zastavicu prije otkrivanja! (dugi dodir)";
             return;
         }
         if(cell.mine) {
@@ -380,8 +380,7 @@
         checkWin();
     }
 
-    function toggleFlag(row, col, e) {
-        if(e) e.preventDefault();
+    function toggleFlag(row, col) {
         if(!gameActive) return;
         let cell = board[row][col];
         if(cell.revealed) return;
@@ -403,12 +402,14 @@
         return true;
     }
 
+    // NOVI POBOLJŠANI TOUCH EVENTI ZA MOBITEL
     function attachEvents() {
         const cells = document.querySelectorAll(".cell");
         cells.forEach(cellDiv => {
             const row = parseInt(cellDiv.getAttribute("data-row"));
             const col = parseInt(cellDiv.getAttribute("data-col"));
             
+            // Lijevi klik (miš)
             cellDiv.addEventListener("click", (e) => {
                 e.stopPropagation();
                 if(!gameActive) return;
@@ -419,31 +420,64 @@
                 }
             });
             
+            // Desni klik (miš)
             cellDiv.addEventListener("contextmenu", (e) => {
                 e.preventDefault();
                 if(!gameActive) return;
-                toggleFlag(row, col, e);
+                toggleFlag(row, col);
             });
             
-            let touchTimer = null;
+            // ----- MOBITEL: razlikovanje kratkog i dugog dodira -----
+            let touchStartTime = 0;
+            let touchTimeout = null;
+            let hasPerformedLongPress = false;
+            
             cellDiv.addEventListener("touchstart", (e) => {
-                touchTimer = setTimeout(() => {
-                    toggleFlag(row, col, e);
-                    touchTimer = null;
+                e.preventDefault();
+                touchStartTime = Date.now();
+                hasPerformedLongPress = false;
+                
+                // Postavi timeout za dugi dodir (500ms)
+                touchTimeout = setTimeout(() => {
+                    if(!hasPerformedLongPress && gameActive) {
+                        hasPerformedLongPress = true;
+                        // DUGI DODIR -> zastavica
+                        toggleFlag(row, col);
+                        // Vibriranje ako mobitel podržava (opcionalno)
+                        if(navigator.vibrate) navigator.vibrate(50);
+                    }
                 }, 500);
             });
+            
             cellDiv.addEventListener("touchend", (e) => {
-                if(touchTimer) {
-                    clearTimeout(touchTimer);
-                    touchTimer = null;
-                    if(gameActive) {
-                        if(firstMove) firstClickHandler(row, col);
-                        else revealCell(row, col);
+                e.preventDefault();
+                clearTimeout(touchTimeout);
+                
+                const touchDuration = Date.now() - touchStartTime;
+                
+                // Ako nije bio dugi dodir i trajalo je manje od 500ms -> KRATKI DODIR (otkrivanje)
+                if(!hasPerformedLongPress && touchDuration < 500 && gameActive) {
+                    if(firstMove) {
+                        firstClickHandler(row, col);
+                    } else {
+                        revealCell(row, col);
                     }
                 }
+                touchStartTime = 0;
+                hasPerformedLongPress = false;
             });
-            cellDiv.addEventListener("touchmove", () => {
-                if(touchTimer) clearTimeout(touchTimer);
+            
+            cellDiv.addEventListener("touchcancel", (e) => {
+                clearTimeout(touchTimeout);
+                touchStartTime = 0;
+                hasPerformedLongPress = false;
+            });
+            
+            // Spriječi skrolanje dok dodiruješ polje
+            cellDiv.addEventListener("touchmove", (e) => {
+                clearTimeout(touchTimeout);
+                touchStartTime = 0;
+                hasPerformedLongPress = false;
             });
         });
     }
@@ -508,7 +542,6 @@
         newGameWithDifficulty(currentDifficulty);
     }
 
-    // postavljanje eventa za gumbe težina
     function setupDifficultyButtons() {
         document.querySelectorAll(".difficulty-btn").forEach(btn => {
             btn.addEventListener("click", () => {
@@ -523,7 +556,6 @@
         });
     }
     
-    // pokretanje sa srednjom težinom kao default
     setupDifficultyButtons();
     newGameWithDifficulty("medium");
 </script>
