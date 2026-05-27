@@ -115,16 +115,17 @@
             width: fit-content;
         }
 
+        /* KOCKICE POVEĆANE ZA 25% */
         .cell {
             aspect-ratio: 1 / 1;
-            min-width: 32px;
+            min-width: 40px;        /* 32px → 40px (+25%) */
             background-color: #b0b3c0;
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.2rem;      /* malo veći broj */
             cursor: pointer;
             transition: 0.05s linear;
             box-shadow: inset 0 -1px 0 #7e8292, inset 1px 1px 0 #eef3ff;
@@ -132,14 +133,14 @@
         }
 
         @media (max-width: 650px) {
-            .cell { min-width: 28px; font-size: 0.85rem; }
+            .cell { min-width: 35px; font-size: 1rem; }      /* 28px → 35px */
         }
         @media (max-width: 550px) {
-            .cell { min-width: 26px; font-size: 0.8rem; }
+            .cell { min-width: 33px; font-size: 0.95rem; }   /* 26px → 33px */
             .difficulty-btn { padding: 4px 10px; font-size: 0.75rem; }
         }
         @media (max-width: 450px) {
-            .cell { min-width: 24px; font-size: 0.7rem; }
+            .cell { min-width: 30px; font-size: 0.9rem; }    /* 24px → 30px */
         }
 
         .cell.revealed {
@@ -150,7 +151,7 @@
 
         .cell.flagged::before {
             content: "🚩";
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
         .cell.revealed.flagged::before {
@@ -172,7 +173,7 @@
         }
         .cell.bomb-revealed::after {
             content: "💣";
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
 
         .message-area {
@@ -211,7 +212,7 @@
         <div class="difficulty-panel">
             <button class="difficulty-btn" data-diff="easy">🟢 LAGANO (8x8)</button>
             <button class="difficulty-btn active" data-diff="medium">🟡 SREDNJE (10x10)</button>
-            <button class="difficulty-btn" data-diff="hard">🔴 TEŠKO (14x14)</button>
+            <button class="difficulty-btn" data-diff="hard">🔴 TEŠKO (12x12)</button>
         </div>
 
         <div class="info-panel">
@@ -235,7 +236,7 @@
     const DIFFICULTY_SETTINGS = {
         easy:   { size: 8,  mines: 10 },
         medium: { size: 10, mines: 15 },
-        hard:   { size: 14, mines: 35 }
+        hard:   { size: 12, mines: 30 }   // 12x12 sa 30 mina (14x14 je bio 35)
     };
     
     let board = [];
@@ -402,7 +403,7 @@
         return true;
     }
 
-    // NOVI POBOLJŠANI TOUCH EVENTI ZA MOBITEL
+    // TOUCH EVENTI ZA MOBITEL (bez vibracije)
     function attachEvents() {
         const cells = document.querySelectorAll(".cell");
         cells.forEach(cellDiv => {
@@ -441,10 +442,8 @@
                 touchTimeout = setTimeout(() => {
                     if(!hasPerformedLongPress && gameActive) {
                         hasPerformedLongPress = true;
-                        // DUGI DODIR -> zastavica
+                        // DUGI DODIR -> zastavica (BEZ VIBRACIJE)
                         toggleFlag(row, col);
-                        // Vibriranje ako mobitel podržava (opcionalno)
-                        if(navigator.vibrate) navigator.vibrate(50);
                     }
                 }, 500);
             });
