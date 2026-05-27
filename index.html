@@ -28,6 +28,8 @@
             padding: 20px 15px 20px 15px;
             box-shadow: 0 20px 35px rgba(0,0,0,0.4);
             text-align: center;
+            max-width: 100%;
+            overflow-x: auto;
         }
 
         h1 {
@@ -113,19 +115,21 @@
             justify-content: center;
             margin: 0 auto;
             width: fit-content;
+            max-width: 100%;
+            overflow-x: auto;
         }
 
-        /* ========== KOCKICE POVEĆANE ZA 20% ========== */
+        /* KOCKICE - povećane za 20% */
         .cell {
             aspect-ratio: 1 / 1;
-            min-width: 40px;        /* prije 32px → povećano 20% = 40px */
+            min-width: 40px;
             background-color: #b0b3c0;
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.15rem;     /* prije 1rem → malo veći broj */
+            font-size: 1.15rem;
             cursor: pointer;
             transition: 0.05s linear;
             box-shadow: inset 0 -1px 0 #7e8292, inset 1px 1px 0 #eef3ff;
@@ -135,7 +139,7 @@
         /* Mobitel 650px */
         @media (max-width: 650px) {
             .cell { 
-                min-width: 34px;     /* prije 28px → 34px */
+                min-width: 34px;
                 font-size: 0.95rem; 
             }
         }
@@ -143,7 +147,7 @@
         /* Mobitel 550px */
         @media (max-width: 550px) {
             .cell { 
-                min-width: 32px;     /* prije 26px → 32px */
+                min-width: 30px;
                 font-size: 0.9rem; 
             }
             .difficulty-btn { 
@@ -152,10 +156,10 @@
             }
         }
         
-        /* Mali mobitel 450px */
-        @media (max-width: 450px) {
+        /* Mali mobitel 450px - za tešku 12x12 */
+        @media (max-width: 480px) {
             .cell { 
-                min-width: 29px;     /* prije 24px → 29px */
+                min-width: 28px;
                 font-size: 0.85rem; 
             }
         }
@@ -168,7 +172,7 @@
 
         .cell.flagged::before {
             content: "🚩";
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .cell.revealed.flagged::before {
@@ -229,7 +233,7 @@
         <div class="difficulty-panel">
             <button class="difficulty-btn" data-diff="easy">🟢 LAGANO (8x8)</button>
             <button class="difficulty-btn active" data-diff="medium">🟡 SREDNJE (10x10)</button>
-            <button class="difficulty-btn" data-diff="hard">🔴 TEŠKO (14x14)</button>
+            <button class="difficulty-btn" data-diff="hard">🔴 TEŠKO (12x12)</button>
         </div>
 
         <div class="info-panel">
@@ -253,7 +257,7 @@
     const DIFFICULTY_SETTINGS = {
         easy:   { size: 8,  mines: 10 },
         medium: { size: 10, mines: 15 },
-        hard:   { size: 14, mines: 35 }
+        hard:   { size: 12, mines: 28 }    // 12x12 sa 28 mina (izazovno ali igrivo)
     };
     
     let board = [];
@@ -420,14 +424,12 @@
         return true;
     }
 
-    // MOBITEL: touch eventi (kratki/dugi dodir)
     function attachEvents() {
         const cells = document.querySelectorAll(".cell");
         cells.forEach(cellDiv => {
             const row = parseInt(cellDiv.getAttribute("data-row"));
             const col = parseInt(cellDiv.getAttribute("data-col"));
             
-            // Lijevi klik (miš)
             cellDiv.addEventListener("click", (e) => {
                 e.stopPropagation();
                 if(!gameActive) return;
@@ -438,14 +440,12 @@
                 }
             });
             
-            // Desni klik (miš)
             cellDiv.addEventListener("contextmenu", (e) => {
                 e.preventDefault();
                 if(!gameActive) return;
                 toggleFlag(row, col);
             });
             
-            // ----- MOBITEL -----
             let touchStartTime = 0;
             let touchTimeout = null;
             let hasPerformedLongPress = false;
