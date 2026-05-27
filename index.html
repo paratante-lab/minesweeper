@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Minolovac - Lagano / Srednje / Teško</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2d5a3b, #1e3a2f);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #3b3f45;
+            border-radius: 28px;
+            padding: 20px 15px 20px 15px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 5px 0;
+            color: #ffd966;
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 0 #7a4c1a;
+        }
+
+        .difficulty-panel {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-btn {
+            background: #2c2f36;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+            font-size: 0.9rem;
+        }
+
+        .difficulty-btn.active {
+            background: #ff914d;
+            box-shadow: 0 0 0 2px #ffd966;
+        }
+
+        .difficulty-btn:active {
+            transform: scale(0.96);
+        }
+
+        .info-panel {
+            background: #2c2f36;
+            border-radius: 60px;
+            padding: 8px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            color: white;
+            font-weight: bold;
+        }
+
+        .mine-counter, .restart-btn, .flag-counter {
+            background: #1e1f24;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .restart-btn {
+            background: #ff914d;
+            cursor: pointer;
+            transition: 0.1s linear;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .restart-btn:active {
+            transform: scale(0.96);
+            background: #e07c3a;
+        }
+
+        .board {
+            display: grid;
+            background-color: #7c7f8c;
+            padding: 6px;
+            border-radius: 12px;
+            gap: 2px;
+            background: #5a5e6e;
+            justify-content: center;
+            margin: 0 auto;
+            width: fit-content;
+        }
+
+        .cell {
+            aspect-ratio: 1 / 1;
+            min-width: 28px;
+            background-color: #b0b3c0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.05s linear;
+            box-shadow: inset 0 -1px 0 #7e8292, inset 1px 1px 0 #eef3ff;
+        }
+
+        /* responsive prilagodba */
+        @media (max-width: 700px) {
+            .cell {
+                min-width: 26px;
+                font-size: 0.75rem;
+            }
+        }
+        @media (max-width: 550px) {
+            .cell {
+                min-width: 24px;
+                font-size: 0.7rem;
+            }
+            .difficulty-btn { padding: 4px 12px; font-size: 0.8rem; }
+        }
+        @media (max-width: 450px) {
+            .cell {
+                min-width: 22px;
+                font-size: 0.65rem;
+            }
+        }
+
+        .cell.revealed {
+            background-color: #dbdee8;
+            box-shadow: inset 0 0 0 1px #9da0ae;
+            cursor: default;
+        }
+
+        .cell.flagged::before {
+            content: "🚩";
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .cell.revealed.flagged::before {
+            content: "";
+        }
+
+        .cell[data-value="1"] { color: #1e4d8f; }
+        .cell[data-value="2"] { color: #2d6a2d; }
+        .cell[data-value="3"] { color: #c92a2a; }
+        .cell[data-value="4"] { color: #2c3e66; }
+        .cell[data-value="5"] { color: #7a3e1f; }
+        .cell[data-value="6"] { color: #3f7e7e; }
+        .cell[data-value="7"] { color: black; }
+        .cell[data-value="8"] { color: #5e2a5e; }
+
+        .cell.bomb-revealed {
+            background-color: #e03a3a;
+            color: white;
+        }
+        .cell.bomb-revealed::after {
+            content: "💣";
+            font-size: 0.8rem;
+        }
+
+        .message-area {
+            margin-top: 18px;
+            background: #22252c;
+            padding: 6px 12px;
+            border-radius: 40px;
+            color: #ffd966;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        footer {
+            font-size: 0.7rem;
+            margin-top: 12px;
+            color: #bbb;
+        }
+        button {
+            background: none;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="game-container">
+        <h1>💣 MINOLOVAC</h1>
+        
+        <div class="difficulty-panel">
+            <button class="difficulty-btn" data-diff="easy">🟢 LAGANO (8x8)</button>
+            <button class="difficulty-btn active" data-diff="medium">🟡 SREDNJE (10x10)</button>
+            <button class="difficulty-btn" data-diff="hard">🔴 TEŠKO (14x14)</button>
+        </div>
+
+        <div class="info-panel">
+            <div class="mine-counter">💣 000</div>
+            <button class="restart-btn" id="restartGame">😊 NOVA IGRA</button>
+            <div class="flag-counter">🚩 000</div>
+        </div>
+        <div class="board" id="board"></div>
+        <div class="message-area" id="statusMsg">🌟 Lijevi klik = otkrij | Desni klik / dugi dodir = zastavica</div>
+        <footer>Razine težine | Prvi klik nikad nije mina</footer>
+    </div>
+</div>
+
+<script>
+    // ---------- POSTAVKE RAZINA ----------
+    let currentDifficulty = "medium";  // easy, medium, hard
+    let BOARD_SIZE = 10;
+    let TOTAL_MINES = 15;
+    
+    const DIFFICULTY_SETTINGS = {
+        easy:   { size: 8,  mines: 10 },
+        medium: { size: 10, mines: 15 },
+        hard:   { size: 14, mines: 35 }
+    };
+    
+    let board = [];
+    let gameActive = true;
+    let firstMove = true;
+    let boardElement = document.getElementById("board");
+    let mineCounterSpan = document.querySelector(".mine-counter");
+    let flagCounterSpan = document.querySelector(".flag-counter");
+    let statusMsgDiv = document.getElementById("statusMsg");
+
+    function updateFlagCounter() {
+        let flagCount = 0;
+        for(let r = 0; r < BOARD_SIZE; r++) {
+            for(let c = 0; c < BOARD_SIZE; c++) {
+                if(board[r][c] && board[r][c].flag) flagCount++;
+            }
+        }
+        flagCounterSpan.innerText = "🚩 " + String(flagCount).padStart(3, '0');
+    }
+
+    function updateMineCounter() {
+        let flagged = 0;
+        for(let r=0; r<BOARD_SIZE; r++)
+            for(let c=0; c<BOARD_SIZE; c++)
+                if(board[r][c] && board[r][c].flag) flagged++;
+        let remaining = TOTAL_MINES - flagged;
+        mineCounterSpan.innerText = `💣 ${String(remaining).padStart(3, '0')}`;
+    }
+
+    function initEmptyBoard() {
+        let newBoard = [];
+        for(let i = 0; i < BOARD_SIZE; i++) {
+            newBoard[i] = [];
+            for(let j = 0; j < BOARD_SIZE; j++) {
+                newBoard[i][j] = {
+                    mine: false,
+                    revealed: false,
+                    flag: false,
+                    neighborMines: 0
+                };
+            }
+        }
+        return newBoard;
+    }
+
+    function placeMines(excludeRow, excludeCol) {
+        let minesPlaced = 0;
+        while(minesPlaced < TOTAL_MINES) {
+            let row = Math.floor(Math.random() * BOARD_SIZE);
+            let col = Math.floor(Math.random() * BOARD_SIZE);
+            if((row === excludeRow && col === excludeCol)) continue;
+            if(!board[row][col].mine) {
+                board[row][col].mine = true;
+                minesPlaced++;
+            }
+        }
+        for(let r = 0; r < BOARD_SIZE; r++) {
+            for(let c = 0; c < BOARD_SIZE; c++) {
+                if(board[r][c].mine) {
+                    board[r][c].neighborMines = -1;
+                    continue;
+                }
+                let cnt = 0;
+                for(let dr = -1; dr <= 1; dr++) {
+                    for(let dc = -1; dc <= 1; dc++) {
+                        if(dr === 0 && dc === 0) continue;
+                        let nr = r + dr, nc = c + dc;
+                        if(nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc].mine) cnt++;
+                    }
+                }
+                board[r][c].neighborMines = cnt;
+            }
+        }
+    }
+
+    function revealEmpty(row, col) {
+        if(row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return;
+        let cell = board[row][col];
+        if(cell.revealed) return;
+        if(cell.flag) return;
+        if(cell.mine) return;
+        
+        cell.revealed = true;
+        if(cell.neighborMines === 0) {
+            for(let dr = -1; dr <= 1; dr++) {
+                for(let dc = -1; dc <= 1; dc++) {
+                    if(dr === 0 && dc === 0) continue;
+                    revealEmpty(row+dr, col+dc);
+                }
+            }
+        }
+    }
+
+    function checkWin() {
+        let allSafeRevealed = true;
+        for(let i=0; i<BOARD_SIZE; i++) {
+            for(let j=0; j<BOARD_SIZE; j++) {
+                let cell = board[i][j];
+                if(!cell.mine && !cell.revealed) {
+                    allSafeRevealed = false;
+                }
+            }
+        }
+        if(allSafeRevealed && gameActive) {
+            gameActive = false;
+            statusMsgDiv.innerHTML = "🎉 POBJEDA! Savršeno! 🎉  Klikni NOVA IGRA";
+            statusMsgDiv.style.background = "#2b5e2b";
+            for(let i=0;i<BOARD_SIZE;i++)
+                for(let j=0;j<BOARD_SIZE;j++)
+                    if(board[i][j].mine && !board[i][j].flag)
+                        board[i][j].flag = true;
+            updateFlagCounter();
+            renderBoard();
+        }
+    }
+
+    function revealCell(row, col) {
+        if(!gameActive) return;
+        let cell = board[row][col];
+        if(cell.revealed) return;
+        if(cell.flag) {
+            statusMsgDiv.innerHTML = "⚠️ Ukloni zastavicu prije otkrivanja! (desni klik)";
+            return;
+        }
+        if(cell.mine) {
+            cell.revealed = true;
+            gameActive = false;
+            statusMsgDiv.innerHTML = `💥 BOOM! Naletio/la si na minu. Igra gotova. Pritisni NOVA IGRA 💥`;
+            statusMsgDiv.style.background = "#a12222";
+            for(let i=0;i<BOARD_SIZE;i++)
+                for(let j=0;j<BOARD_SIZE;j++)
+                    if(board[i][j].mine) board[i][j].revealed = true;
+            renderBoard();
+            return;
+        }
+        if(cell.neighborMines === 0) {
+            revealEmpty(row, col);
+        } else {
+            cell.revealed = true;
+        }
+        renderBoard();
+        checkWin();
+    }
+
+    function toggleFlag(row, col, e) {
+        if(e) e.preventDefault();
+        if(!gameActive) return;
+        let cell = board[row][col];
+        if(cell.revealed) return;
+        cell.flag = !cell.flag;
+        updateFlagCounter();
+        updateMineCounter();
+        renderBoard();
+        checkWin();
+    }
+
+    function firstClickHandler(row, col) {
+        if(!firstMove) return false;
+        if(board[row][col].flag) return false;
+        board = initEmptyBoard();
+        placeMines(row, col);
+        firstMove = false;
+        revealCell(row, col);
+        renderBoard();
+        return true;
+    }
+
+    function attachEvents() {
+        const cells = document.querySelectorAll(".cell");
+        cells.forEach(cellDiv => {
+            const row = parseInt(cellDiv.getAttribute("data-row"));
+            const col = parseInt(cellDiv.getAttribute("data-col"));
+            
+            cellDiv.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if(!gameActive) return;
+                if(firstMove) {
+                    firstClickHandler(row, col);
+                } else {
+                    revealCell(row, col);
+                }
+            });
+            
+            cellDiv.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                if(!gameActive) return;
+                toggleFlag(row, col, e);
+            });
+            
+            let touchTimer = null;
+            cellDiv.addEventListener("touchstart", (e) => {
+                touchTimer = setTimeout(() => {
+                    toggleFlag(row, col, e);
+                    touchTimer = null;
+                }, 500);
+            });
+            cellDiv.addEventListener("touchend", (e) => {
+                if(touchTimer) {
+                    clearTimeout(touchTimer);
+                    touchTimer = null;
+                    if(gameActive) {
+                        if(firstMove) firstClickHandler(row, col);
+                        else revealCell(row, col);
+                    }
+                }
+            });
+            cellDiv.addEventListener("touchmove", () => {
+                if(touchTimer) clearTimeout(touchTimer);
+            });
+        });
+    }
+
+    function renderBoard() {
+        boardElement.innerHTML = "";
+        boardElement.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
+        for(let i = 0; i < BOARD_SIZE; i++) {
+            for(let j = 0; j < BOARD_SIZE; j++) {
+                const cell = board[i][j];
+                const cellDiv = document.createElement("div");
+                cellDiv.classList.add("cell");
+                cellDiv.setAttribute("data-row", i);
+                cellDiv.setAttribute("data-col", j);
+                
+                if(cell.revealed) {
+                    cellDiv.classList.add("revealed");
+                    if(cell.mine) {
+                        cellDiv.classList.add("bomb-revealed");
+                        cellDiv.innerText = "";
+                    } else {
+                        let val = cell.neighborMines;
+                        if(val > 0) {
+                            cellDiv.innerText = val;
+                            cellDiv.setAttribute("data-value", val);
+                        } else {
+                            cellDiv.innerText = "";
+                        }
+                    }
+                } else {
+                    if(cell.flag) {
+                        cellDiv.classList.add("flagged");
+                        cellDiv.innerText = "";
+                    } else {
+                        cellDiv.innerText = "";
+                    }
+                }
+                boardElement.appendChild(cellDiv);
+            }
+        }
+        attachEvents();
+    }
+
+    function newGameWithDifficulty(difficulty) {
+        currentDifficulty = difficulty;
+        const settings = DIFFICULTY_SETTINGS[difficulty];
+        BOARD_SIZE = settings.size;
+        TOTAL_MINES = settings.mines;
+        
+        gameActive = true;
+        firstMove = true;
+        board = initEmptyBoard();
+        
+        statusMsgDiv.innerHTML = "🌟 Lijevi klik = otkrij | Desni klik / dugi dodir = zastavica";
+        statusMsgDiv.style.background = "#22252c";
+        updateFlagCounter();
+        updateMineCounter();
+        renderBoard();
+    }
+    
+    function restartSameDifficulty() {
+        newGameWithDifficulty(currentDifficulty);
+    }
+
+    // postavljanje eventa za gumbe težina
+    function setupDifficultyButtons() {
+        document.querySelectorAll(".difficulty-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".difficulty-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                const diff = btn.getAttribute("data-diff");
+                newGameWithDifficulty(diff);
+            });
+        });
+        document.getElementById("restartGame").addEventListener("click", () => {
+            restartSameDifficulty();
+        });
+    }
+    
+    // pokretanje sa srednjom težinom kao default
+    setupDifficultyButtons();
+    newGameWithDifficulty("medium");
+</script>
+</body>
+</html>
