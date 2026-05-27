@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Minolovac - Optimiziran za mobitel</title>
+    <title>Minolovac - Brza verzija</title>
     <style>
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
-
         body {
             background: linear-gradient(135deg, #2d5a3b, #1e3a2f);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,23 +20,18 @@
             margin: 0;
             padding: 20px;
         }
-
         .game-container {
             background: #3b3f45;
             border-radius: 28px;
-            padding: 20px 15px 20px 15px;
+            padding: 20px 15px;
             box-shadow: 0 20px 35px rgba(0,0,0,0.4);
             text-align: center;
-            max-width: 100%;
         }
-
         h1 {
-            margin: 0 0 5px 0;
+            margin: 0 0 5px;
             color: #ffd966;
             font-size: 1.8rem;
-            text-shadow: 2px 2px 0 #7a4c1a;
         }
-
         .difficulty-panel {
             display: flex;
             justify-content: center;
@@ -45,7 +39,6 @@
             margin-bottom: 15px;
             flex-wrap: wrap;
         }
-
         .difficulty-btn {
             background: #2c2f36;
             border: none;
@@ -54,15 +47,12 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.1s;
             font-size: 0.85rem;
         }
-
         .difficulty-btn.active {
             background: #ff914d;
             box-shadow: 0 0 0 2px #ffd966;
         }
-
         .info-panel {
             background: #2c2f36;
             border-radius: 60px;
@@ -76,28 +66,23 @@
             color: white;
             font-weight: bold;
         }
-
         .mine-counter, .restart-btn, .flag-counter {
             background: #1e1f24;
             padding: 5px 14px;
             border-radius: 40px;
             font-size: 1.1rem;
             font-family: monospace;
-            letter-spacing: 2px;
         }
-
         .restart-btn {
             background: #ff914d;
             cursor: pointer;
             border: none;
             color: white;
-            font-weight: bold;
             font-size: 0.95rem;
         }
-
         .board {
             display: grid;
-            background-color: #5a5e6e;
+            background: #5a5e6e;
             padding: 6px;
             border-radius: 12px;
             gap: 2px;
@@ -105,11 +90,10 @@
             margin: 0 auto;
             width: fit-content;
         }
-
         .cell {
             aspect-ratio: 1 / 1;
             min-width: 40px;
-            background-color: #b0b3c0;
+            background: #b0b3c0;
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -119,27 +103,14 @@
             cursor: pointer;
             box-shadow: inset 0 -1px 0 #7e8292, inset 1px 1px 0 #eef3ff;
         }
-
-        @media (max-width: 650px) {
-            .cell { min-width: 34px; font-size: 0.95rem; }
-        }
-        @media (max-width: 550px) {
-            .cell { min-width: 30px; font-size: 0.9rem; }
-        }
-        @media (max-width: 480px) {
-            .cell { min-width: 28px; font-size: 0.85rem; }
-        }
-
+        @media (max-width: 650px) { .cell { min-width: 34px; font-size: 0.95rem; } }
+        @media (max-width: 550px) { .cell { min-width: 30px; font-size: 0.9rem; } }
+        @media (max-width: 480px) { .cell { min-width: 28px; font-size: 0.85rem; } }
         .cell.revealed {
-            background-color: #dbdee8;
+            background: #dbdee8;
             box-shadow: inset 0 0 0 1px #9da0ae;
         }
-
-        .cell.flagged::before {
-            content: "🚩";
-            font-size: 0.95rem;
-        }
-
+        .cell.flagged::before { content: "🚩"; font-size: 0.95rem; }
         .cell.revealed.flagged::before { content: ""; }
         .cell[data-value="1"] { color: #1e4d8f; }
         .cell[data-value="2"] { color: #2d6a2d; }
@@ -149,29 +120,15 @@
         .cell[data-value="6"] { color: #3f7e7e; }
         .cell[data-value="7"] { color: black; }
         .cell[data-value="8"] { color: #5e2a5e; }
-
-        .cell.bomb-revealed {
-            background-color: #e03a3a;
-            color: white;
-        }
-        .cell.bomb-revealed::after {
-            content: "💣";
-            font-size: 0.9rem;
-        }
-
+        .cell.bomb-revealed { background: #e03a3a; color: white; }
+        .cell.bomb-revealed::after { content: "💣"; font-size: 0.9rem; }
         .message-area {
             margin-top: 18px;
             background: #22252c;
             padding: 6px 12px;
             border-radius: 40px;
             color: #ffd966;
-            font-weight: bold;
             font-size: 0.85rem;
-        }
-        footer {
-            font-size: 0.7rem;
-            margin-top: 12px;
-            color: #bbb;
         }
         .instruction {
             background: #1e1f24;
@@ -187,228 +144,207 @@
 <div>
     <div class="game-container">
         <h1>💣 MINOLOVAC</h1>
-        
         <div class="difficulty-panel">
             <button class="difficulty-btn" data-diff="easy">🟢 LAGANO (8x8)</button>
             <button class="difficulty-btn active" data-diff="medium">🟡 SREDNJE (10x10)</button>
             <button class="difficulty-btn" data-diff="hard">🔴 TEŠKO (12x12)</button>
         </div>
-
         <div class="info-panel">
             <div class="mine-counter">💣 000</div>
             <button class="restart-btn" id="restartGame">😊 NOVA IGRA</button>
             <div class="flag-counter">🚩 000</div>
         </div>
         <div class="board" id="board"></div>
-        <div class="message-area" id="statusMsg">🌟 Kratki dodir = otkrij | Dugi dodir = 🚩</div>
-        <div class="instruction">📱 DUGI DODIR (pritisni i drži) za zastavicu</div>
+        <div class="message-area" id="statusMsg">⭐ KRATKI dodir = otkrij | DUGI dodir = zastavica</div>
+        <div class="instruction">📱 DUGI DODIR (pritisni i drži 0.5s) za 🚩</div>
     </div>
 </div>
 
 <script>
-    const DIFFICULTY_SETTINGS = {
+(function(){
+    const DIFFS = {
         easy:   { size: 8,  mines: 10 },
         medium: { size: 10, mines: 15 },
         hard:   { size: 12, mines: 28 }
     };
     
-    let currentDifficulty = "medium";
-    let BOARD_SIZE = 10, TOTAL_MINES = 15;
-    let board = [], gameActive = true, firstMove = true;
-    let boardElement = document.getElementById("board");
+    let currentDiff = "medium";
+    let size = 10, totalMines = 15;
+    let grid = [];
+    let active = true, first = true;
+    const boardDiv = document.getElementById("board");
+    const statusDiv = document.getElementById("statusMsg");
+    const mineSpan = document.querySelector(".mine-counter");
+    const flagSpan = document.querySelector(".flag-counter");
     
-    function updateCounters() {
+    function updateUI() {
         let flagged = 0;
-        for(let r=0; r<BOARD_SIZE; r++)
-            for(let c=0; c<BOARD_SIZE; c++)
-                if(board[r][c].flag) flagged++;
-        document.querySelector(".mine-counter").innerText = `💣 ${String(TOTAL_MINES - flagged).padStart(3, '0')}`;
-        document.querySelector(".flag-counter").innerText = `🚩 ${String(flagged).padStart(3, '0')}`;
+        for(let i=0;i<size;i++) for(let j=0;j<size;j++) if(grid[i][j].flag) flagged++;
+        mineSpan.innerText = `💣 ${String(totalMines - flagged).padStart(3,'0')}`;
+        flagSpan.innerText = `🚩 ${String(flagged).padStart(3,'0')}`;
     }
     
-    function initEmptyBoard() {
-        let b = [];
-        for(let i=0; i<BOARD_SIZE; i++) {
-            b[i] = [];
-            for(let j=0; j<BOARD_SIZE; j++)
-                b[i][j] = { mine: false, revealed: false, flag: false, neighborMines: 0 };
+    function initEmpty() {
+        let g = [];
+        for(let i=0;i<size;i++) {
+            g[i] = [];
+            for(let j=0;j<size;j++) g[i][j] = { mine:false, revealed:false, flag:false, val:0 };
         }
-        return b;
+        return g;
     }
     
-    function placeMines(excludeRow, excludeCol) {
+    function placeMines(exR, exC) {
         let placed = 0;
-        while(placed < TOTAL_MINES) {
-            let r = Math.floor(Math.random() * BOARD_SIZE);
-            let c = Math.floor(Math.random() * BOARD_SIZE);
-            if((r===excludeRow && c===excludeCol)) continue;
-            if(!board[r][c].mine) {
-                board[r][c].mine = true;
+        while(placed < totalMines) {
+            let r = Math.floor(Math.random()*size);
+            let c = Math.floor(Math.random()*size);
+            if((r===exR && c===exC)) continue;
+            if(!grid[r][c].mine) {
+                grid[r][c].mine = true;
                 placed++;
             }
         }
-        for(let r=0; r<BOARD_SIZE; r++) {
-            for(let c=0; c<BOARD_SIZE; c++) {
-                if(board[r][c].mine) { board[r][c].neighborMines = -1; continue; }
-                let cnt = 0;
-                for(let dr=-1; dr<=1; dr++)
-                    for(let dc=-1; dc<=1; dc++)
-                        if(dr||dc) {
-                            let nr=r+dr, nc=c+dc;
-                            if(nr>=0 && nr<BOARD_SIZE && nc>=0 && nc<BOARD_SIZE && board[nr][nc].mine) cnt++;
-                        }
-                board[r][c].neighborMines = cnt;
+        for(let r=0;r<size;r++) {
+            for(let c=0;c<size;c++) {
+                if(grid[r][c].mine) { grid[r][c].val = -1; continue; }
+                let cnt=0;
+                for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) if(dr||dc) {
+                    let nr=r+dr, nc=c+dc;
+                    if(nr>=0 && nr<size && nc>=0 && nc<size && grid[nr][nc].mine) cnt++;
+                }
+                grid[r][c].val = cnt;
             }
         }
     }
     
-    function revealEmpty(row, col) {
-        if(row<0 || row>=BOARD_SIZE || col<0 || col>=BOARD_SIZE) return;
-        let cell = board[row][col];
+    function revealEmpty(r,c) {
+        if(r<0||r>=size||c<0||c>=size) return;
+        let cell = grid[r][c];
         if(cell.revealed || cell.flag || cell.mine) return;
         cell.revealed = true;
-        if(cell.neighborMines === 0) {
-            for(let dr=-1; dr<=1; dr++)
-                for(let dc=-1; dc<=1; dc++)
-                    if(dr||dc) revealEmpty(row+dr, col+dc);
+        if(cell.val === 0) {
+            for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) if(dr||dc) revealEmpty(r+dr,c+dc);
         }
     }
     
     function checkWin() {
-        for(let i=0; i<BOARD_SIZE; i++)
-            for(let j=0; j<BOARD_SIZE; j++)
-                if(!board[i][j].mine && !board[i][j].revealed) return;
-        if(gameActive) {
-            gameActive = false;
-            document.getElementById("statusMsg").innerHTML = "🎉 POBJEDA! 🎉";
-            for(let i=0;i<BOARD_SIZE;i++)
-                for(let j=0;j<BOARD_SIZE;j++)
-                    if(board[i][j].mine) board[i][j].flag = true;
-            renderBoard();
+        for(let i=0;i<size;i++) for(let j=0;j<size;j++) if(!grid[i][j].mine && !grid[i][j].revealed) return;
+        if(active) {
+            active = false;
+            statusDiv.innerHTML = "🎉 POBJEDA! Čestitamo! 🎉";
+            for(let i=0;i<size;i++) for(let j=0;j<size;j++) if(grid[i][j].mine) grid[i][j].flag = true;
+            render();
         }
     }
     
-    function revealCell(row, col) {
-        if(!gameActive) return;
-        let cell = board[row][col];
+    function revealCell(r,c) {
+        if(!active) return;
+        let cell = grid[r][c];
         if(cell.revealed) return;
-        if(cell.flag) { return; }
+        if(cell.flag) return;
         if(cell.mine) {
             cell.revealed = true;
-            gameActive = false;
-            document.getElementById("statusMsg").innerHTML = "💥 BOOM! Izgubio/la si! 💥";
-            for(let i=0;i<BOARD_SIZE;i++)
-                for(let j=0;j<BOARD_SIZE;j++)
-                    if(board[i][j].mine) board[i][j].revealed = true;
-            renderBoard();
+            active = false;
+            statusDiv.innerHTML = "💥 BOOM! Izgubio/la si! Pritisni NOVA IGRA 💥";
+            for(let i=0;i<size;i++) for(let j=0;j<size;j++) if(grid[i][j].mine) grid[i][j].revealed = true;
+            render();
             return;
         }
-        if(cell.neighborMines === 0) revealEmpty(row, col);
+        if(cell.val === 0) revealEmpty(r,c);
         else cell.revealed = true;
-        renderBoard();
+        render();
         checkWin();
     }
     
-    function toggleFlag(row, col) {
-        if(!gameActive) return;
-        let cell = board[row][col];
+    function toggleFlag(r,c) {
+        if(!active) return;
+        let cell = grid[r][c];
         if(cell.revealed) return;
         cell.flag = !cell.flag;
-        updateCounters();
-        renderBoard();
+        updateUI();
+        render();
         checkWin();
     }
     
-    function firstClickHandler(row, col) {
-        if(!firstMove) return;
-        if(board[row][col].flag) return;
-        board = initEmptyBoard();
-        placeMines(row, col);
-        firstMove = false;
-        revealCell(row, col);
+    function firstClick(r,c) {
+        if(!first) return;
+        if(grid[r][c].flag) return;
+        grid = initEmpty();
+        placeMines(r,c);
+        first = false;
+        revealCell(r,c);
     }
     
-    function renderBoard() {
-        boardElement.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
+    function render() {
+        boardDiv.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
         let html = '';
-        for(let i=0; i<BOARD_SIZE; i++) {
-            for(let j=0; j<BOARD_SIZE; j++) {
-                const cell = board[i][j];
-                let classes = 'cell';
+        for(let i=0;i<size;i++) {
+            for(let j=0;j<size;j++) {
+                const cell = grid[i][j];
+                let cls = 'cell';
                 let content = '';
-                let dataValue = '';
-                
+                let dataVal = '';
                 if(cell.revealed) {
-                    classes += ' revealed';
+                    cls += ' revealed';
                     if(cell.mine) {
-                        classes += ' bomb-revealed';
-                        content = '';
-                    } else if(cell.neighborMines > 0) {
-                        content = cell.neighborMines;
-                        dataValue = `data-value="${cell.neighborMines}"`;
+                        cls += ' bomb-revealed';
+                    } else if(cell.val > 0) {
+                        content = cell.val;
+                        dataVal = `data-value="${cell.val}"`;
                     }
                 } else if(cell.flag) {
-                    classes += ' flagged';
+                    cls += ' flagged';
                 }
-                
-                html += `<div class="${classes}" data-row="${i}" data-col="${j}" ${dataValue}>${content}</div>`;
+                html += `<div class="${cls}" data-r="${i}" data-c="${j}" ${dataVal}>${content}</div>`;
             }
         }
-        boardElement.innerHTML = html;
-        attachEvents();
+        boardDiv.innerHTML = html;
     }
     
-    function attachEvents() {
-        document.querySelectorAll('.cell').forEach(el => {
-            const row = parseInt(el.dataset.row);
-            const col = parseInt(el.dataset.col);
+    function bindEvents() {
+        boardDiv.querySelectorAll('.cell').forEach(el => {
+            const r = parseInt(el.dataset.r);
+            const c = parseInt(el.dataset.c);
             
             el.onclick = (e) => {
                 e.stopPropagation();
-                if(firstMove) firstClickHandler(row, col);
-                else revealCell(row, col);
+                if(first) firstClick(r,c);
+                else revealCell(r,c);
             };
-            
             el.oncontextmenu = (e) => {
                 e.preventDefault();
-                toggleFlag(row, col);
+                toggleFlag(r,c);
             };
-            
-            let touchTimer = null;
+            let timer = null;
             el.ontouchstart = (e) => {
                 e.preventDefault();
-                touchTimer = setTimeout(() => {
-                    toggleFlag(row, col);
-                    touchTimer = null;
-                }, 500);
+                timer = setTimeout(() => { toggleFlag(r,c); timer = null; }, 500);
             };
             el.ontouchend = (e) => {
                 e.preventDefault();
-                if(touchTimer) {
-                    clearTimeout(touchTimer);
-                    if(firstMove) firstClickHandler(row, col);
-                    else revealCell(row, col);
-                    touchTimer = null;
+                if(timer) {
+                    clearTimeout(timer);
+                    if(first) firstClick(r,c);
+                    else revealCell(r,c);
+                    timer = null;
                 }
             };
-            el.ontouchmove = () => {
-                if(touchTimer) clearTimeout(touchTimer);
-                touchTimer = null;
-            };
+            el.ontouchmove = () => { if(timer) { clearTimeout(timer); timer = null; } };
         });
     }
     
-    function newGame(difficulty) {
-        currentDifficulty = difficulty;
-        const set = DIFFICULTY_SETTINGS[difficulty];
-        BOARD_SIZE = set.size;
-        TOTAL_MINES = set.mines;
-        gameActive = true;
-        firstMove = true;
-        board = initEmptyBoard();
-        updateCounters();
-        renderBoard();
-        document.getElementById("statusMsg").innerHTML = "🌟 Kratki dodir = otkrij | Dugi dodir = 🚩";
+    function newGame(diff) {
+        currentDiff = diff;
+        const s = DIFFS[diff];
+        size = s.size;
+        totalMines = s.mines;
+        active = true;
+        first = true;
+        grid = initEmpty();
+        updateUI();
+        render();
+        bindEvents();
+        statusDiv.innerHTML = "⭐ KRATKI dodir = otkrij | DUGI dodir = zastavica";
     }
     
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
@@ -418,9 +354,10 @@
             newGame(btn.dataset.diff);
         };
     });
-    document.getElementById('restartGame').onclick = () => newGame(currentDifficulty);
+    document.getElementById('restartGame').onclick = () => newGame(currentDiff);
     
     newGame('medium');
+})();
 </script>
 </body>
 </html>
