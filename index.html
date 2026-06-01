@@ -1,562 +1,377 @@
 <!DOCTYPE html>
 <html lang="hr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Minolovac - Lagano / Srednje / Teško</title>
-    <style>
-        * {
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Minesweeper</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #1a1a2e;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    color: #eee;
+  }
+  h1 { font-size: 1.6rem; letter-spacing: 2px; margin-bottom: 0.75rem; color: #e94560; }
 
-        body {
-            background: linear-gradient(135deg, #2d5a3b, #1e3a2f);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
+  .level-bar { display: flex; gap: 8px; margin-bottom: 0.75rem; }
+  .lvl-btn {
+    padding: 6px 16px; border-radius: 20px;
+    border: 2px solid #e94560; background: transparent;
+    color: #e94560; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .lvl-btn.active, .lvl-btn:hover { background: #e94560; color: #fff; }
 
-        .game-container {
-            background: #3b3f45;
-            border-radius: 28px;
-            padding: 20px 15px 20px 15px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.4);
-            text-align: center;
-        }
+  .hud {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; max-width: 440px;
+    background: #16213e; border-radius: 12px;
+    padding: 8px 16px; margin-bottom: 0.75rem;
+    font-size: 14px; font-weight: 600;
+  }
+  .hud-item { display: flex; align-items: center; gap: 6px; }
+  .reset-btn {
+    background: #e94560; border: none; color: #fff;
+    width: 36px; height: 36px; border-radius: 50%;
+    font-size: 18px; cursor: pointer; transition: transform 0.1s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .reset-btn:hover { transform: scale(1.1); }
+  .reset-btn:active { transform: scale(0.95); }
 
-        h1 {
-            margin: 0 0 5px 0;
-            color: #ffd966;
-            font-size: 1.8rem;
-            text-shadow: 2px 2px 0 #7a4c1a;
-        }
+  #grid {
+    display: grid; gap: 3px;
+    padding: 10px; background: #16213e;
+    border-radius: 12px; touch-action: manipulation;
+    user-select: none; -webkit-user-select: none;
+  }
+  .cell {
+    border-radius: 6px; background: #0f3460;
+    border: 1px solid #1a4a80;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: background 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cell:hover { background: #1a4a80; }
+  .cell:active { background: #0d2d50; }
+  .cell.revealed {
+    background: #0a2540; border-color: #0d2d50; cursor: default;
+  }
+  .cell.revealed:hover { background: #0a2540; }
+  .cell.flagged { background: #0f3460; }
+  .cell.mine-hit { background: #5c1a1a !important; border-color: #e94560 !important; }
+  .n1{color:#4fc3f7} .n2{color:#81c784} .n3{color:#e94560}
+  .n4{color:#ce93d8} .n5{color:#ff8a65} .n6{color:#4dd0e1}
+  .n7{color:#f48fb1} .n8{color:#bdbdbd}
 
-        .difficulty-panel {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .difficulty-btn {
-            background: #2c2f36;
-            border: none;
-            padding: 6px 15px;
-            border-radius: 40px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.1s;
-            font-size: 0.85rem;
-        }
-
-        .difficulty-btn.active {
-            background: #ff914d;
-            box-shadow: 0 0 0 2px #ffd966;
-        }
-
-        .difficulty-btn:active {
-            transform: scale(0.96);
-        }
-
-        .info-panel {
-            background: #2c2f36;
-            border-radius: 60px;
-            padding: 8px 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            color: white;
-            font-weight: bold;
-        }
-
-        .mine-counter, .restart-btn, .flag-counter {
-            background: #1e1f24;
-            padding: 5px 14px;
-            border-radius: 40px;
-            font-size: 1.1rem;
-            font-family: monospace;
-            letter-spacing: 2px;
-        }
-
-        .restart-btn {
-            background: #ff914d;
-            cursor: pointer;
-            transition: 0.1s linear;
-            border: none;
-            color: white;
-            font-weight: bold;
-            font-size: 0.95rem;
-        }
-
-        .restart-btn:active {
-            transform: scale(0.96);
-        }
-
-        .board {
-            display: grid;
-            background-color: #7c7f8c;
-            padding: 6px;
-            border-radius: 12px;
-            gap: 2px;
-            background: #5a5e6e;
-            justify-content: center;
-            margin: 0 auto;
-            width: fit-content;
-        }
-
-        /* KOCKICE POVEĆANE ZA 25% */
-        .cell {
-            aspect-ratio: 1 / 1;
-            min-width: 40px;        /* 32px → 40px (+25%) */
-            background-color: #b0b3c0;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;      /* malo veći broj */
-            cursor: pointer;
-            transition: 0.05s linear;
-            box-shadow: inset 0 -1px 0 #7e8292, inset 1px 1px 0 #eef3ff;
-            touch-action: manipulation;
-        }
-
-        @media (max-width: 650px) {
-            .cell { min-width: 35px; font-size: 1rem; }      /* 28px → 35px */
-        }
-        @media (max-width: 550px) {
-            .cell { min-width: 33px; font-size: 0.95rem; }   /* 26px → 33px */
-            .difficulty-btn { padding: 4px 10px; font-size: 0.75rem; }
-        }
-        @media (max-width: 450px) {
-            .cell { min-width: 30px; font-size: 0.9rem; }    /* 24px → 30px */
-        }
-
-        .cell.revealed {
-            background-color: #dbdee8;
-            box-shadow: inset 0 0 0 1px #9da0ae;
-            cursor: default;
-        }
-
-        .cell.flagged::before {
-            content: "🚩";
-            font-size: 1rem;
-        }
-
-        .cell.revealed.flagged::before {
-            content: "";
-        }
-
-        .cell[data-value="1"] { color: #1e4d8f; }
-        .cell[data-value="2"] { color: #2d6a2d; }
-        .cell[data-value="3"] { color: #c92a2a; }
-        .cell[data-value="4"] { color: #2c3e66; }
-        .cell[data-value="5"] { color: #7a3e1f; }
-        .cell[data-value="6"] { color: #3f7e7e; }
-        .cell[data-value="7"] { color: black; }
-        .cell[data-value="8"] { color: #5e2a5e; }
-
-        .cell.bomb-revealed {
-            background-color: #e03a3a;
-            color: white;
-        }
-        .cell.bomb-revealed::after {
-            content: "💣";
-            font-size: 0.9rem;
-        }
-
-        .message-area {
-            margin-top: 18px;
-            background: #22252c;
-            padding: 6px 12px;
-            border-radius: 40px;
-            color: #ffd966;
-            font-weight: bold;
-            font-size: 0.85rem;
-        }
-        footer {
-            font-size: 0.7rem;
-            margin-top: 12px;
-            color: #bbb;
-        }
-        button {
-            background: none;
-            border: none;
-        }
-        .instruction {
-            background: #1e1f24;
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 30px;
-            margin-top: 5px;
-            font-size: 0.7rem;
-        }
-    </style>
+  /* OVERLAY */
+  .overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; backdrop-filter: blur(3px);
+  }
+  .overlay.hidden { display: none; }
+  .modal {
+    background: #16213e; border: 1px solid #e94560;
+    border-radius: 16px; padding: 1.5rem;
+    max-width: 300px; width: 90%;
+    display: flex; flex-direction: column; gap: 12px;
+    animation: popIn 0.2s ease;
+  }
+  @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal h2 { font-size: 1.2rem; color: #e94560; }
+  .modal p { font-size: 14px; color: #aaa; line-height: 1.5; }
+  .modal-btn {
+    padding: 10px 14px; border-radius: 10px;
+    border: 1px solid #1a4a80; background: #0f3460;
+    color: #eee; font-size: 14px; cursor: pointer;
+    text-align: left; display: flex; align-items: center; gap: 10px;
+    transition: background 0.15s;
+  }
+  .modal-btn:hover, .modal-btn.selected { background: #1a4a80; border-color: #e94560; }
+  .modal-btn .icon { font-size: 20px; }
+  .primary-btn {
+    padding: 10px; border-radius: 10px;
+    border: none; background: #e94560;
+    color: #fff; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .primary-btn:hover { background: #c73652; }
+</style>
 </head>
 <body>
-<div>
-    <div class="game-container">
-        <h1>💣 MINOLOVAC</h1>
-        
-        <div class="difficulty-panel">
-            <button class="difficulty-btn" data-diff="easy">🟢 LAGANO (8x8)</button>
-            <button class="difficulty-btn active" data-diff="medium">🟡 SREDNJE (10x10)</button>
-            <button class="difficulty-btn" data-diff="hard">🔴 TEŠKO (12x12)</button>
-        </div>
 
-        <div class="info-panel">
-            <div class="mine-counter">💣 000</div>
-            <button class="restart-btn" id="restartGame">😊 NOVA IGRA</button>
-            <div class="flag-counter">🚩 000</div>
-        </div>
-        <div class="board" id="board"></div>
-        <div class="message-area" id="statusMsg">🌟 Lijevi klik = otkrij | Desni klik / dugi dodir = 🚩</div>
-        <div class="instruction">📱 Na mobitelu: KRATKI dodir = otkrij | DUGI dodir (1 sekunda) = zastavica</div>
-        <footer>Razine težine | Prvi klik nikad nije mina</footer>
-    </div>
+<h1>💣 MINESWEEPER</h1>
+
+<div class="level-bar">
+  <button class="lvl-btn active" onclick="setLevel('easy')">Lagani 6×6</button>
+  <button class="lvl-btn" onclick="setLevel('medium')">Srednji 8×8</button>
+  <button class="lvl-btn" onclick="setLevel('hard')">Teški 10×10</button>
+</div>
+
+<div class="hud">
+  <div class="hud-item">💣 <span id="mine-count">0</span></div>
+  <button class="reset-btn" id="face-btn" onclick="newGame()">🙂</button>
+  <div class="hud-item">⏱ <span id="timer">0</span>s</div>
+</div>
+
+<div id="grid"></div>
+
+<!-- START MODAL -->
+<div class="overlay" id="start-overlay">
+  <div class="modal">
+    <h2>💣 Minesweeper</h2>
+    <p>Kako želiš upravljati ćelijama?</p>
+    <button class="modal-btn selected" id="btn-ask" onclick="selectMode('ask')">
+      <span class="icon">❓</span>
+      <div><strong>Pitaj me svaki put</strong><br><small style="color:#aaa">Pop-up pri svakom kliku</small></div>
+    </button>
+    <button class="modal-btn" id="btn-flag" onclick="selectMode('flag')">
+      <span class="icon">🚩</span>
+      <div><strong>Dugi pritisak = zastavica</strong><br><small style="color:#aaa">Kratki klik otvara, dugi = zastava</small></div>
+    </button>
+    <button class="modal-btn" id="btn-open" onclick="selectMode('open')">
+      <span class="icon">👆</span>
+      <div><strong>Samo otvori</strong><br><small style="color:#aaa">Bez zastavica</small></div>
+    </button>
+    <button class="primary-btn" onclick="startGame()">Počni →</button>
+  </div>
+</div>
+
+<!-- ACTION MODAL -->
+<div class="overlay hidden" id="action-overlay">
+  <div class="modal">
+    <h2>Što želiš?</h2>
+    <button class="modal-btn" onclick="doAction('open')"><span class="icon">👆</span> Otvori ćeliju</button>
+    <button class="modal-btn" onclick="doAction('flag')"><span class="icon">🚩</span> Postavi zastavicu</button>
+    <button class="modal-btn" onclick="doAction('cancel')" style="border-color:#555;color:#aaa"><span class="icon">✖</span> Odustani</button>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="overlay hidden" id="result-overlay">
+  <div class="modal">
+    <h2 id="result-title"></h2>
+    <p id="result-msg"></p>
+    <button class="primary-btn" onclick="newGame()">Igraj ponovo →</button>
+  </div>
 </div>
 
 <script>
-    // ---------- POSTAVKE RAZINA ----------
-    let currentDifficulty = "medium";
-    let BOARD_SIZE = 10;
-    let TOTAL_MINES = 15;
-    
-    const DIFFICULTY_SETTINGS = {
-        easy:   { size: 8,  mines: 10 },
-        medium: { size: 10, mines: 15 },
-        hard:   { size: 12, mines: 30 }   // 12x12 sa 30 mina (14x14 je bio 35)
-    };
-    
-    let board = [];
-    let gameActive = true;
-    let firstMove = true;
-    let boardElement = document.getElementById("board");
-    let mineCounterSpan = document.querySelector(".mine-counter");
-    let flagCounterSpan = document.querySelector(".flag-counter");
-    let statusMsgDiv = document.getElementById("statusMsg");
+const LEVELS = {
+  easy:   { size: 6,  mines: 6 },
+  medium: { size: 8,  mines: 12 },
+  hard:   { size: 10, mines: 20 }
+};
 
-    function updateFlagCounter() {
-        let flagCount = 0;
-        for(let r = 0; r < BOARD_SIZE; r++) {
-            for(let c = 0; c < BOARD_SIZE; c++) {
-                if(board[r][c] && board[r][c].flag) flagCount++;
-            }
-        }
-        flagCounterSpan.innerText = "🚩 " + String(flagCount).padStart(3, '0');
-    }
+let level = 'easy';
+let mode = 'ask';
+let board = [], revealed = [], flagged = [];
+let gameOver = false, firstClick = true;
+let timerInterval = null, seconds = 0;
+let pendingCell = null;
 
-    function updateMineCounter() {
-        let flagged = 0;
-        for(let r=0; r<BOARD_SIZE; r++)
-            for(let c=0; c<BOARD_SIZE; c++)
-                if(board[r][c] && board[r][c].flag) flagged++;
-        let remaining = TOTAL_MINES - flagged;
-        mineCounterSpan.innerText = `💣 ${String(remaining).padStart(3, '0')}`;
-    }
+// --- LEVEL ---
+function setLevel(l) {
+  level = l;
+  document.querySelectorAll('.lvl-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['easy','medium','hard'][i] === l);
+  });
+  newGame();
+}
 
-    function initEmptyBoard() {
-        let newBoard = [];
-        for(let i = 0; i < BOARD_SIZE; i++) {
-            newBoard[i] = [];
-            for(let j = 0; j < BOARD_SIZE; j++) {
-                newBoard[i][j] = {
-                    mine: false,
-                    revealed: false,
-                    flag: false,
-                    neighborMines: 0
-                };
-            }
-        }
-        return newBoard;
-    }
+// --- MODE ---
+function selectMode(m) {
+  mode = m;
+  ['ask','flag','open'].forEach(x => {
+    document.getElementById('btn-' + x).classList.toggle('selected', x === m);
+  });
+}
 
-    function placeMines(excludeRow, excludeCol) {
-        let minesPlaced = 0;
-        while(minesPlaced < TOTAL_MINES) {
-            let row = Math.floor(Math.random() * BOARD_SIZE);
-            let col = Math.floor(Math.random() * BOARD_SIZE);
-            if((row === excludeRow && col === excludeCol)) continue;
-            if(!board[row][col].mine) {
-                board[row][col].mine = true;
-                minesPlaced++;
-            }
-        }
-        for(let r = 0; r < BOARD_SIZE; r++) {
-            for(let c = 0; c < BOARD_SIZE; c++) {
-                if(board[r][c].mine) {
-                    board[r][c].neighborMines = -1;
-                    continue;
-                }
-                let cnt = 0;
-                for(let dr = -1; dr <= 1; dr++) {
-                    for(let dc = -1; dc <= 1; dc++) {
-                        if(dr === 0 && dc === 0) continue;
-                        let nr = r + dr, nc = c + dc;
-                        if(nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc].mine) cnt++;
-                    }
-                }
-                board[r][c].neighborMines = cnt;
-            }
-        }
-    }
+function startGame() {
+  document.getElementById('start-overlay').classList.add('hidden');
+  newGame();
+}
 
-    function revealEmpty(row, col) {
-        if(row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return;
-        let cell = board[row][col];
-        if(cell.revealed) return;
-        if(cell.flag) return;
-        if(cell.mine) return;
-        
-        cell.revealed = true;
-        if(cell.neighborMines === 0) {
-            for(let dr = -1; dr <= 1; dr++) {
-                for(let dc = -1; dc <= 1; dc++) {
-                    if(dr === 0 && dc === 0) continue;
-                    revealEmpty(row+dr, col+dc);
-                }
-            }
-        }
-    }
+// --- NEW GAME ---
+function newGame() {
+  clearInterval(timerInterval);
+  seconds = 0;
+  document.getElementById('timer').textContent = '0';
+  document.getElementById('face-btn').textContent = '🙂';
+  document.getElementById('result-overlay').classList.add('hidden');
+  document.getElementById('action-overlay').classList.add('hidden');
+  gameOver = false; firstClick = true; pendingCell = null;
+  const { size, mines } = LEVELS[level];
+  const total = size * size;
+  board    = Array(total).fill(0);
+  revealed = Array(total).fill(false);
+  flagged  = Array(total).fill(false);
+  document.getElementById('mine-count').textContent = mines;
+  renderGrid();
+}
 
-    function checkWin() {
-        let allSafeRevealed = true;
-        for(let i=0; i<BOARD_SIZE; i++) {
-            for(let j=0; j<BOARD_SIZE; j++) {
-                let cell = board[i][j];
-                if(!cell.mine && !cell.revealed) {
-                    allSafeRevealed = false;
-                }
-            }
-        }
-        if(allSafeRevealed && gameActive) {
-            gameActive = false;
-            statusMsgDiv.innerHTML = "🎉 POBJEDA! Savršeno! 🎉  Klikni NOVA IGRA";
-            statusMsgDiv.style.background = "#2b5e2b";
-            for(let i=0;i<BOARD_SIZE;i++)
-                for(let j=0;j<BOARD_SIZE;j++)
-                    if(board[i][j].mine && !board[i][j].flag)
-                        board[i][j].flag = true;
-            updateFlagCounter();
-            renderBoard();
-        }
+// --- PLACE MINES (after first click) ---
+function placeMines(safeIdx) {
+  const { size, mines } = LEVELS[level];
+  const total = size * size;
+  let placed = 0;
+  while (placed < mines) {
+    const r = Math.floor(Math.random() * total);
+    if (r !== safeIdx && board[r] !== 9) { board[r] = 9; placed++; }
+  }
+  for (let i = 0; i < total; i++) {
+    if (board[i] === 9) continue;
+    board[i] = neighbors(i, size).filter(n => board[n] === 9).length;
+  }
+}
+
+function neighbors(idx, size) {
+  const r = Math.floor(idx / size), c = idx % size, ns = [];
+  for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+    if (dr === 0 && dc === 0) continue;
+    const nr = r + dr, nc = c + dc;
+    if (nr >= 0 && nr < size && nc >= 0 && nc < size) ns.push(nr * size + nc);
+  }
+  return ns;
+}
+
+// --- RENDER ---
+function renderGrid() {
+  const { size } = LEVELS[level];
+  const g = document.getElementById('grid');
+  const maxW = Math.min(window.innerWidth - 40, 440);
+  const cellSize = Math.floor((maxW - 20 - (size - 1) * 3) / size);
+  g.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
+  g.innerHTML = '';
+
+  for (let i = 0; i < size * size; i++) {
+    const el = document.createElement('div');
+    el.className = 'cell';
+    el.style.width  = cellSize + 'px';
+    el.style.height = cellSize + 'px';
+    el.style.fontSize = Math.max(12, Math.floor(cellSize * 0.45)) + 'px';
+
+    if (revealed[i]) {
+      el.classList.add('revealed');
+      if (board[i] === 9) el.textContent = '💣';
+      else if (board[i] > 0) { el.textContent = board[i]; el.classList.add('n' + board[i]); }
+    } else if (flagged[i]) {
+      el.classList.add('flagged');
+      el.textContent = '🚩';
     }
 
-    function revealCell(row, col) {
-        if(!gameActive) return;
-        let cell = board[row][col];
-        if(cell.revealed) return;
-        if(cell.flag) {
-            statusMsgDiv.innerHTML = "⚠️ Ukloni zastavicu prije otkrivanja! (dugi dodir)";
-            return;
-        }
-        if(cell.mine) {
-            cell.revealed = true;
-            gameActive = false;
-            statusMsgDiv.innerHTML = `💥 BOOM! Naletio/la si na minu. Igra gotova. Pritisni NOVA IGRA 💥`;
-            statusMsgDiv.style.background = "#a12222";
-            for(let i=0;i<BOARD_SIZE;i++)
-                for(let j=0;j<BOARD_SIZE;j++)
-                    if(board[i][j].mine) board[i][j].revealed = true;
-            renderBoard();
-            return;
-        }
-        if(cell.neighborMines === 0) {
-            revealEmpty(row, col);
-        } else {
-            cell.revealed = true;
-        }
-        renderBoard();
-        checkWin();
-    }
+    // click
+    el.addEventListener('click', () => handleClick(i));
+    // right click = flag
+    el.addEventListener('contextmenu', e => { e.preventDefault(); toggleFlag(i); });
 
-    function toggleFlag(row, col) {
-        if(!gameActive) return;
-        let cell = board[row][col];
-        if(cell.revealed) return;
-        cell.flag = !cell.flag;
-        updateFlagCounter();
-        updateMineCounter();
-        renderBoard();
-        checkWin();
-    }
+    // long press for mobile
+    let lt = null;
+    el.addEventListener('touchstart', () => {
+      lt = setTimeout(() => { clearTimeout(lt); lt = null; toggleFlag(i); }, 500);
+    }, { passive: true });
+    el.addEventListener('touchend',  () => { clearTimeout(lt); lt = null; }, { passive: true });
+    el.addEventListener('touchmove', () => { clearTimeout(lt); lt = null; }, { passive: true });
 
-    function firstClickHandler(row, col) {
-        if(!firstMove) return false;
-        if(board[row][col].flag) return false;
-        board = initEmptyBoard();
-        placeMines(row, col);
-        firstMove = false;
-        revealCell(row, col);
-        renderBoard();
-        return true;
-    }
+    g.appendChild(el);
+  }
+}
 
-    // TOUCH EVENTI ZA MOBITEL (bez vibracije)
-    function attachEvents() {
-        const cells = document.querySelectorAll(".cell");
-        cells.forEach(cellDiv => {
-            const row = parseInt(cellDiv.getAttribute("data-row"));
-            const col = parseInt(cellDiv.getAttribute("data-col"));
-            
-            // Lijevi klik (miš)
-            cellDiv.addEventListener("click", (e) => {
-                e.stopPropagation();
-                if(!gameActive) return;
-                if(firstMove) {
-                    firstClickHandler(row, col);
-                } else {
-                    revealCell(row, col);
-                }
-            });
-            
-            // Desni klik (miš)
-            cellDiv.addEventListener("contextmenu", (e) => {
-                e.preventDefault();
-                if(!gameActive) return;
-                toggleFlag(row, col);
-            });
-            
-            // ----- MOBITEL: razlikovanje kratkog i dugog dodira -----
-            let touchStartTime = 0;
-            let touchTimeout = null;
-            let hasPerformedLongPress = false;
-            
-            cellDiv.addEventListener("touchstart", (e) => {
-                e.preventDefault();
-                touchStartTime = Date.now();
-                hasPerformedLongPress = false;
-                
-                // Postavi timeout za dugi dodir (500ms)
-                touchTimeout = setTimeout(() => {
-                    if(!hasPerformedLongPress && gameActive) {
-                        hasPerformedLongPress = true;
-                        // DUGI DODIR -> zastavica (BEZ VIBRACIJE)
-                        toggleFlag(row, col);
-                    }
-                }, 500);
-            });
-            
-            cellDiv.addEventListener("touchend", (e) => {
-                e.preventDefault();
-                clearTimeout(touchTimeout);
-                
-                const touchDuration = Date.now() - touchStartTime;
-                
-                // Ako nije bio dugi dodir i trajalo je manje od 500ms -> KRATKI DODIR (otkrivanje)
-                if(!hasPerformedLongPress && touchDuration < 500 && gameActive) {
-                    if(firstMove) {
-                        firstClickHandler(row, col);
-                    } else {
-                        revealCell(row, col);
-                    }
-                }
-                touchStartTime = 0;
-                hasPerformedLongPress = false;
-            });
-            
-            cellDiv.addEventListener("touchcancel", (e) => {
-                clearTimeout(touchTimeout);
-                touchStartTime = 0;
-                hasPerformedLongPress = false;
-            });
-            
-            // Spriječi skrolanje dok dodiruješ polje
-            cellDiv.addEventListener("touchmove", (e) => {
-                clearTimeout(touchTimeout);
-                touchStartTime = 0;
-                hasPerformedLongPress = false;
-            });
-        });
-    }
+// --- CLICK HANDLER ---
+function handleClick(idx) {
+  if (gameOver || revealed[idx] || flagged[idx]) return;
+  if (mode === 'ask') { pendingCell = idx; document.getElementById('action-overlay').classList.remove('hidden'); return; }
+  if (mode === 'flag') { toggleFlag(idx); return; }
+  openCell(idx);
+}
 
-    function renderBoard() {
-        boardElement.innerHTML = "";
-        boardElement.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
-        for(let i = 0; i < BOARD_SIZE; i++) {
-            for(let j = 0; j < BOARD_SIZE; j++) {
-                const cell = board[i][j];
-                const cellDiv = document.createElement("div");
-                cellDiv.classList.add("cell");
-                cellDiv.setAttribute("data-row", i);
-                cellDiv.setAttribute("data-col", j);
-                
-                if(cell.revealed) {
-                    cellDiv.classList.add("revealed");
-                    if(cell.mine) {
-                        cellDiv.classList.add("bomb-revealed");
-                        cellDiv.innerText = "";
-                    } else {
-                        let val = cell.neighborMines;
-                        if(val > 0) {
-                            cellDiv.innerText = val;
-                            cellDiv.setAttribute("data-value", val);
-                        } else {
-                            cellDiv.innerText = "";
-                        }
-                    }
-                } else {
-                    if(cell.flag) {
-                        cellDiv.classList.add("flagged");
-                        cellDiv.innerText = "";
-                    } else {
-                        cellDiv.innerText = "";
-                    }
-                }
-                boardElement.appendChild(cellDiv);
-            }
-        }
-        attachEvents();
-    }
+function doAction(action) {
+  document.getElementById('action-overlay').classList.add('hidden');
+  if (pendingCell === null || action === 'cancel') { pendingCell = null; return; }
+  if (action === 'flag') toggleFlag(pendingCell);
+  else openCell(pendingCell);
+  pendingCell = null;
+}
 
-    function newGameWithDifficulty(difficulty) {
-        currentDifficulty = difficulty;
-        const settings = DIFFICULTY_SETTINGS[difficulty];
-        BOARD_SIZE = settings.size;
-        TOTAL_MINES = settings.mines;
-        
-        gameActive = true;
-        firstMove = true;
-        board = initEmptyBoard();
-        
-        statusMsgDiv.innerHTML = "🌟 Lijevi klik = otkrij | Desni klik / dugi dodir = zastavica";
-        statusMsgDiv.style.background = "#22252c";
-        updateFlagCounter();
-        updateMineCounter();
-        renderBoard();
-    }
-    
-    function restartSameDifficulty() {
-        newGameWithDifficulty(currentDifficulty);
-    }
+// --- FLAG ---
+function toggleFlag(idx) {
+  if (gameOver || revealed[idx]) return;
+  flagged[idx] = !flagged[idx];
+  const { mines } = LEVELS[level];
+  document.getElementById('mine-count').textContent = mines - flagged.filter(Boolean).length;
+  renderGrid();
+  checkWin();
+}
 
-    function setupDifficultyButtons() {
-        document.querySelectorAll(".difficulty-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.querySelectorAll(".difficulty-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                const diff = btn.getAttribute("data-diff");
-                newGameWithDifficulty(diff);
-            });
-        });
-        document.getElementById("restartGame").addEventListener("click", () => {
-            restartSameDifficulty();
-        });
-    }
-    
-    setupDifficultyButtons();
-    newGameWithDifficulty("medium");
+// --- OPEN ---
+function openCell(idx) {
+  if (firstClick) {
+    firstClick = false;
+    placeMines(idx);
+    timerInterval = setInterval(() => {
+      seconds++;
+      document.getElementById('timer').textContent = seconds;
+    }, 1000);
+  }
+  if (board[idx] === 9) {
+    revealed[idx] = true;
+    renderGrid();
+    // mark the hit cell
+    const cells = document.getElementById('grid').children;
+    cells[idx].classList.add('mine-hit');
+    endGame(false);
+    return;
+  }
+  floodReveal(idx);
+  renderGrid();
+  checkWin();
+}
+
+function floodReveal(idx) {
+  if (revealed[idx] || flagged[idx]) return;
+  revealed[idx] = true;
+  if (board[idx] === 0) {
+    const { size } = LEVELS[level];
+    neighbors(idx, size).forEach(n => floodReveal(n));
+  }
+}
+
+// --- WIN/LOSE ---
+function checkWin() {
+  const { mines } = LEVELS[level];
+  if (revealed.filter(v => !v).length === mines) endGame(true);
+}
+
+function endGame(win) {
+  clearInterval(timerInterval);
+  gameOver = true;
+  document.getElementById('face-btn').textContent = win ? '😎' : '😵';
+  if (!win) {
+    const { size } = LEVELS[level];
+    for (let i = 0; i < size * size; i++) if (board[i] === 9) revealed[i] = true;
+  }
+  renderGrid();
+  setTimeout(() => {
+    const ov = document.getElementById('result-overlay');
+    document.getElementById('result-title').textContent = win ? '🎉 Pobjeda!' : '💥 Boom!';
+    document.getElementById('result-msg').textContent = win
+      ? `Riješio si za ${seconds} sekundi! Bravo!`
+      : 'Nagazio si na minu. Nema veze, pokušaj ponovo!';
+    ov.classList.remove('hidden');
+  }, 600);
+}
+
+// init
+newGame();
 </script>
 </body>
 </html>
